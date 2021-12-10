@@ -32,6 +32,8 @@ host_key_checking = False
 ansible all -u root --ask-pass -m ping
 ## command to install yum packages
 ansible all -u root --ask-pass -a "yum -y install git-core net-tools sshpass wget"
+######## set the variable 
+export ANSIBLE_CONFIG=/user/bigdata/ansibleProjects/sshpass/files
 ```
 
 
