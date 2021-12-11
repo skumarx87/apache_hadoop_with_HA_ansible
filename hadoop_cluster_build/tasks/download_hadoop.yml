@@ -1,0 +1,29 @@
+- name: Check hadoop archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ hadoop_file }}"
+  register: hadoop_download_file
+
+- name: Checking Hive archive file exsit
+  stat:
+    path: "{{ tmp_dir }}/{{ hive_file }}"
+  register: hive_download_file
+
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+
+
+- name: Download Hadoop
+  get_url:
+    url: "{{ hadoop_url }}"
+    dest: "{{ tmp_dir_cache }}/{{ hadoop_file }}"
+  when: not hadoop_download_file.stat.exists
+
+- name: "Moving Files"
+  command: mv {{ tmp_dir_cache }}/{{ hadoop_file }} {{ tmp_dir }}/{{ hadoop_file }}
+  when: not hadoop_download_file.stat.exists 

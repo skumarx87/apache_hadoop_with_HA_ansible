@@ -1,0 +1,12 @@
+---
+- include: download_hadoop.yml 
+  when: download_hadoop
+
+- include: download_hive.yml 
+  when: download_hive
+
+- include: download_spark.yml
+  when: download_spark
+
+- include: download_kafka.yml
+  when: download_kafka

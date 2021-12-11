@@ -1,0 +1,16 @@
+- name: Downloading Binaris
+  hosts: buildserver
+  user: hadoop
+  vars_files:
+    - hadoop_cluster_build/vars/hadoop_build_versions.yml 
+    - hadoop_cluster_build/vars/main.yml 
+    - hadoop_cluster_build/vars/bigdata_install_property.yml 
+  vars:
+    download_hadoop: true
+    download_hive: true
+    download_kafka: true
+    download_spark: true
+#  become: true
+  
+  roles:
+    - role: hadoop_cluster_build

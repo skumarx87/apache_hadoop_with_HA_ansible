@@ -1,0 +1,24 @@
+- name: Checking Kafka arckafka file exsit
+  stat:
+    path: "{{ tmp_dir }}/{{ kafka_file }}"
+  register: kafka_download_file
+
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+
+
+- name: Download Kafka
+  get_url:
+    url: "{{ kafka_url }}"
+    dest: "{{ tmp_dir_cache }}/{{ kafka_file }}"
+  when: not kafka_download_file.stat.exists
+
+- name: "Moving Files"
+  command: mv {{ tmp_dir_cache }}/{{ kafka_file }} {{ tmp_dir }}/{{ kafka_file }}
+  when: not kafka_download_file.stat.exists 
