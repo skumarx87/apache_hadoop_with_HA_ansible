@@ -1,0 +1,9 @@
+<configuration>
+
+  <property>
+    <name>fs.default.name</name>
+    <value>{{ FS_DEFAULT_NAME }}</value>
+  </property>
+
+</configuration>
+

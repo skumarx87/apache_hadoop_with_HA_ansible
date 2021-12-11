@@ -1,5 +1,6 @@
-git add install.yml 
-git add hadoop_cluster_build/*
+git add *.yml
+git add roles/*
+git add vars/*
 git add commit.sh
 
 git commit -am "initial commit"

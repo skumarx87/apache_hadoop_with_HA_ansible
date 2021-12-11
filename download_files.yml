@@ -2,9 +2,9 @@
   hosts: buildserver
   user: hadoop
   vars_files:
-    - hadoop_cluster_build/vars/hadoop_build_versions.yml 
-    - hadoop_cluster_build/vars/main.yml 
-    - hadoop_cluster_build/vars/bigdata_install_property.yml 
+    - vars/bigdata_build_versions.yml 
+    - vars/main.yml 
+    - vars/bigdata_install_property.yml 
   vars:
     download_hadoop: true
     download_hive: true
@@ -13,4 +13,4 @@
 #  become: true
   
   roles:
-    - role: hadoop_cluster_build
+    - role: build 

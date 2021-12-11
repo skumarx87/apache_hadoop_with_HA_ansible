@@ -1,0 +1,21 @@
+- name: Check hadoop archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ hadoop_file }}"
+  register: hadoop_download_file
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+
+- name: Transfer Hadoop binaries
+  copy: src={{ tmp_dir }}/{{ hadoop_file }} dest={{ tmp_dir_cache }}/{{ hadoop_file }}
+  when: not hadoop_download_file.stat.exists
+
+- name: "Moving Files"
+  command: mv {{ tmp_dir_cache }}/{{ hadoop_file }} {{ tmp_dir }}/{{ hadoop_file }}
+  when: not hadoop_download_file.stat.exists 
+
