@@ -46,3 +46,14 @@
    dest: "{{ bigdata_env_dir }}/hadoop"
    state: link  
 #  when: not hadoop_installed_status.stat.exists
+
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/hadoop/bin"
+     - "{{ bigdata_env_dir }}/hadoop/sbin"

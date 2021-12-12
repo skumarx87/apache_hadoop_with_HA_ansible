@@ -47,3 +47,13 @@
    state: link
 #  when: not hive_installed_status.stat.exists
 
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/hive/bin"
+

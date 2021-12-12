@@ -34,5 +34,5 @@ export PATH=$PATH:$BIGDATA_ROOT/thirdparts/Miniconda3/bin
 export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9-src.zip:$PYTHONPATH
 
 alias beeline="beeline -u jdbc:hive2://localhost:10000/default"
-alias bigdata=$BIGDATA_ROOT/bigdata_init.sh
+alias bigdata=$BIGDATA_ROOT/bigadm.sh
 

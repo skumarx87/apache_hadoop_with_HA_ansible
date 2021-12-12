@@ -22,20 +22,10 @@
 
 - name: "Creating Scripts Env soft link"
   file:
-   src: "{{ item.src }}"
-   dest: "{{ item.dest }}"
+   src: "{{ bigdata_dir_scripts }}"
+   dest: "{{ bigdata_env_dir }}/scripts"
    state: link
   with_items:
-   - { src: "{{ bigdata_dir_scripts }}", dest: "{{ bigdata_env_dir }}/scripts" }
-   - { src: "{{ bigdata_dir_scripts }}/bigadm.sh", dest: "{{ bigdata_dir }}/bigadm.sh" }
+   - 
 #  when: not hadoop_installed_status.stat.exists
 
-- name: Setting-up Executable permissions to scripts folders
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: 0775
-    recurse: yes
-  register: dir_creation_status
-  with_items:
-     - "{{ bigdata_dir_scripts }}"
