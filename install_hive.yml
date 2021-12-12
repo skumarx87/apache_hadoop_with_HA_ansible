@@ -6,8 +6,10 @@
     - vars/bigdata_build_versions.yml 
     - vars/main.yml 
     - vars/bigdata_install_property.yml 
+    - vars/bigdata_site_xml_properties.yml 
   vars:
     install_hadoop: true
+    config_hadoop: true
     install_hive: true
 #  become: true
   

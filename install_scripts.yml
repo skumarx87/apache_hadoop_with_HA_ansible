@@ -1,5 +1,5 @@
 - name: Downloading Binaris
-  hosts: hiveNode 
+  hosts: allnodes 
   user: hadoop 
   any_errors_fatal: true
   vars_files:
