@@ -8,6 +8,7 @@
     - vars/bigdata_install_property.yml 
     - vars/bigdata_site_xml_properties.yml 
   vars:
+    user_name: "{{ lookup('env','HOME') }}"
     install_scripts: true
   
   roles:

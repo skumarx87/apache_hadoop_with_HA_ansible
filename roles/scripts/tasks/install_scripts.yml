@@ -39,3 +39,10 @@
   register: dir_creation_status
   with_items:
      - "{{ bigdata_dir_scripts }}"
+
+- name: Updating Bash profile 
+  lineinfile:
+    path: "{{ user_name }}/.bash_profile"
+    line: "source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh"
+    backup: yes
+
