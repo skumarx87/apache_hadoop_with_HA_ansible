@@ -19,11 +19,25 @@ yum -y install git-core net-tools sshpass wget
 mkdir -p /usr/bigdata/ansibleProjects /usr/bigdata/ansibleProjects/{files,playbooks}
 cd /usr/bigdata/ansibleProjects/files
 
-## create hosts file and include all the hostnames
+## create hosts file and update the entries like below hostnames
 (ansible) [hadoop@hmn1 files]$ cat hosts
-hmn1.tanu.com
-hmn2.tanu.com
+###################
+[default]
+laksha.home.com
 
+[buildserver]
+laksha.home.com
+
+[nameNode]
+laksha.home.com
+
+[dataNode]
+laksha.home.com
+tanush.home.com
+
+[hiveNode]
+laksha.home.com
+########################
 create ansible.cfg and add below lines
 
 (ansible) [hadoop@hmn1 files]$ cat ansible.cfg
