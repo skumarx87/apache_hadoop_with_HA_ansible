@@ -10,6 +10,8 @@ export PATH=/usr/bigdata/Miniconda3/bin:$PATH
 source activate ansible
 pip install ansible
 # Using root privilege 
+yum install epel-release
+yum --enablerepo=epel -y install sshpass
 yum -y install git-core net-tools sshpass wget
 ```
 ### Create ansbile project to run ad-hoc commands all the hosts
