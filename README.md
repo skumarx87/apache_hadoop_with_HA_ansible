@@ -31,12 +31,13 @@ create ansible.cfg and add below lines
 inventory         = hosts
 host_key_checking = False
 ###############################
+######## set the variable 
+export ANSIBLE_CONFIG=/usr/bigdata/ansibleProjects/files
 ##command to test the connection
 ansible all -u root --ask-pass -m ping
 ## command to install yum packages
 ansible all -u root --ask-pass -a "yum -y install git-core net-tools sshpass wget"
-######## set the variable 
-export ANSIBLE_CONFIG=/usr/bigdata/ansibleProjects/files
+
 ```
 
 
