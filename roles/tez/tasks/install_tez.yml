@@ -1,0 +1,59 @@
+- name: Checking tez already installed or not
+  stat:
+    path: "{{ bigdata_new_release_dir }}/apache-tez-{{ tez_version }}-bin"
+  register: tez_installed_status
+
+- name: Display all variables/facts known for a host
+  debug:
+    msg: "{% if tez_installed_status.stat.exists %} Tez is already installed {% else %} Tez not installed {% endif %}"
+
+- name: Check tez archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ tez_file }}"
+  register: tez_download_file
+  when: not tez_installed_status.stat.exists
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  register: dir_creation_status
+  when: not tez_installed_status.stat.exists
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ bigdata_dir }}"
+     - "{{ bigdata_env_dir }}"
+     - "{{ bigdata_new_release_dir }}"
+
+- name: Transfer Tez binaries
+  copy: src={{ tmp_dir }}/{{ tez_file }} dest={{ tmp_dir_cache }}/{{ tez_file }}
+  when: not tez_installed_status.stat.exists
+
+
+- name: "Moving Files workspace"
+  command: mv {{ tmp_dir_cache }}/{{ tez_file }} {{ tmp_dir }}/{{ tez_file }}
+  when: not tez_installed_status.stat.exists
+
+- name: Unzip Tez
+  shell: "tar zxf {{ tmp_dir }}/{{ tez_file }} -C {{ bigdata_new_release_dir }}"
+  when: not tez_installed_status.stat.exists
+
+- name: "Creating tez Env soft link"
+  file:
+   src: "{{ bigdata_new_release_dir }}/apache-tez-{{ tez_version }}-bin" 
+   dest: "{{ bigdata_env_dir }}/tez"
+   state: link
+#  when: not tez_installed_status.stat.exists
+
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/tez/bin"
+

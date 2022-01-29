@@ -1,0 +1,59 @@
+- name: Checking derby already installed or not
+  stat:
+    path: "{{ bigdata_new_release_dir }}/apache-derby-{{ derby_version }}-bin"
+  register: derby_installed_status
+
+- name: Display all variables/facts known for a host
+  debug:
+    msg: "{% if derby_installed_status.stat.exists %} Derby is already installed {% else %} Derby not installed {% endif %}"
+
+- name: Check derby archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ derby_file }}"
+  register: derby_download_file
+  when: not derby_installed_status.stat.exists
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  register: dir_creation_status
+  when: not derby_installed_status.stat.exists
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ bigdata_dir }}"
+     - "{{ bigdata_env_dir }}"
+     - "{{ bigdata_new_release_dir }}"
+
+- name: Transfer Derby binaries
+  copy: src={{ tmp_dir }}/{{ derby_file }} dest={{ tmp_dir_cache }}/{{ derby_file }}
+  when: not derby_installed_status.stat.exists
+
+
+- name: "Moving Files workspace"
+  command: mv {{ tmp_dir_cache }}/{{ derby_file }} {{ tmp_dir }}/{{ derby_file }}
+  when: not derby_installed_status.stat.exists
+
+- name: Unzip Derby
+  shell: "tar zxf {{ tmp_dir }}/{{ derby_file }} -C {{ bigdata_new_release_dir }}"
+  when: not derby_installed_status.stat.exists
+
+- name: "Creating derby Env soft link"
+  file:
+   src: "{{ bigdata_new_release_dir }}/db-derby-{{ derby_version }}-bin" 
+   dest: "{{ bigdata_env_dir }}/derby"
+   state: link
+#  when: not derby_installed_status.stat.exists
+
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/derby/bin"
+

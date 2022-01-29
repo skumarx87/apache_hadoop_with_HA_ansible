@@ -1,5 +1,5 @@
 deploy.local: "true"
-deploy_local_dir: "/user/bigdata/buildtmp/parcel"
+deploy_local_dir: "/usr/bigdata/buildtmp/parcel"
 tmp_dir: "/tmp/bigdata-{{ bigdata_release_version }}-build"
 tmp_dir_cache: "/tmp/bigdata-{{ bigdata_release_version }}-build/.cache"
 hadoop_file: "hadoop-{{ hadoop_version }}.tar.gz"

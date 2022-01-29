@@ -1,6 +1,6 @@
 - name: Downloading Binaris
   hosts: buildserver
-  user: hadoop
+  #user: hadoop
   vars_files:
     - vars/bigdata_build_versions.yml 
     - vars/main.yml 
@@ -8,8 +8,10 @@
   vars:
     download_hadoop: true
     download_hive: true
+    download_tez: true
     download_kafka: true
     download_spark: true
+    download_derby: true
 #  become: true
   
   roles:

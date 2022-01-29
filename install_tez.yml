@@ -1,5 +1,5 @@
 - name: Downloading Binaris
-  hosts: nameNode:dataNode 
+  hosts: hiveNode 
   any_errors_fatal: true
   vars_files:
     - vars/bigdata_build_versions.yml 
@@ -7,9 +7,12 @@
     - vars/bigdata_install_property.yml 
     - vars/bigdata_site_xml_properties.yml 
   vars:
-    install_hadoop: true 
-    config_hadoop: true 
-#  become: true
+    install_hadoop: true
+    config_hadoop: true
+    install_hive: true
+    install_tez: true
   
   roles:
-    - role: hadoop
+    - role: hadoop 
+    - role: hive
+    - role: tez 

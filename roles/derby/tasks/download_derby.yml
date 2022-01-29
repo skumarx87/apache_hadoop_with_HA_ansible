@@ -1,0 +1,24 @@
+- name: Checking Derby archive file exsit
+  stat:
+    path: "{{ tmp_dir }}/{{ derby_file }}"
+  register: derby_download_file
+
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+
+
+- name: Download Hadoop
+  get_url:
+    url: "{{ derby_url }}"
+    dest: "{{ tmp_dir_cache }}/{{ derby_file }}"
+  when: not derby_download_file.stat.exists
+
+- name: "Moving Files"
+  command: mv {{ tmp_dir_cache }}/{{ derby_file }} {{ tmp_dir }}/{{ derby_file }}
+  when: not derby_download_file.stat.exists 

@@ -1,0 +1,24 @@
+- name: Checking Hive arctez file exsit
+  stat:
+    path: "{{ tmp_dir }}/{{ tez_file }}"
+  register: tez_download_file
+
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+
+
+- name: Download Hive
+  get_url:
+    url: "{{ tez_url }}"
+    dest: "{{ tmp_dir_cache }}/{{ tez_file }}"
+  when: not tez_download_file.stat.exists
+
+- name: "Moving Files"
+  command: mv {{ tmp_dir_cache }}/{{ tez_file }} {{ tmp_dir }}/{{ tez_file }}
+  when: not tez_download_file.stat.exists 

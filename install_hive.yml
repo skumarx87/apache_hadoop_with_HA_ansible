@@ -1,6 +1,5 @@
 - name: Downloading Binaris
   hosts: hiveNode 
-  user: hadoop 
   any_errors_fatal: true
   vars_files:
     - vars/bigdata_build_versions.yml 

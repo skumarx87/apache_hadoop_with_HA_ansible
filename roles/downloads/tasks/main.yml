@@ -5,8 +5,14 @@
 - include: download_hive.yml 
   when: download_hive
 
+- include: download_tez.yml
+  when: download_tez
+
 - include: download_spark.yml
   when: download_spark
+
+- include: download_derby.yml
+  when: download_derby
 
 - include: download_kafka.yml
   when: download_kafka

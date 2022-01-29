@@ -7,9 +7,7 @@
     - vars/bigdata_install_property.yml 
     - vars/bigdata_site_xml_properties.yml 
   vars:
-    install_hadoop: true 
-    config_hadoop: true 
-#  become: true
+    install_derby: true 
   
   roles:
-    - role: hadoop
+    - role: derby
