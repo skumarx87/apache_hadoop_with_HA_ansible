@@ -6,7 +6,7 @@ mkdir softwares
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/bigdata/Miniconda3
 export PATH=/user/bigdata/Miniconda3/bin:$PATH
-conda create -n ansible
+/usr/bigdata/Miniconda3/bin/conda create -n ansible
 source activate ansible
 pip install ansible
 yum -y install git-core net-tools sshpass wget
