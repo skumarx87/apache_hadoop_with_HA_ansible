@@ -3,6 +3,11 @@
     path: "{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}"
   register: hadoop_installed_status
 
+- name: Checking Java Installed or not
+  command: "{{ java_home }}/bin/java -version"
+  register: java_result
+  ignore_errors: False
+
 - name: Display all variables/facts known for a host
   debug:
     msg: "{% if hadoop_installed_status.stat.exists %} Hadoop is already installed {% else %} Hadoop not installed {% endif %}"

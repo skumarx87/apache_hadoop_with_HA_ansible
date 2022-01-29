@@ -10,6 +10,7 @@ spark_hadoop_file: "spark-{{ spark_version }}-bin-hadoop{{ spark_hadoop_version 
 derby_file: "db-derby-{{ derby_version }}-bin.tar.gz"
 kafka_file: "kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
 zookeeper_file: "apache-zookeeper-{{ zookeeper_version }}-bin.tar.gz"
+impala_file: "apache-impala-{{ impala_version }}.tar.gz"
 
 hadoop_url: "{{ apache_hadoop_site }}/hadoop/core/hadoop-{{ hadoop_version }}/{{ hadoop_file }}"
 hive_url: "{{ apache_hive_site }}/hive/hive-{{ hive_version }}/{{ hive_file }}"
@@ -19,3 +20,4 @@ spark_hadoop_url: "{{ apache_spark_site }}/spark/spark-{{ spark_version }}/{{ sp
 derby_url: "{{ apache_hadoop_site }}/db/derby/db-derby-{{ derby_version }}/{{ derby_file }}"
 kafka_url: "{{ apache_kafka_site }}/kafka/{{ kafka_version }}/{{ kafka_file }}"
 zookeeper_url: "{{ apache_zookeeper_site }}/zookeeper/zookeeper-{{ zookeeper_version }}/{{ zookeeper_file }}"
+impala_url: "{{ apache_impala_site }}/impala/{{ impala_version }}/{{ impala_file }}"

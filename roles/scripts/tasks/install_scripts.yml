@@ -28,6 +28,7 @@
   with_items:
    - { src: "{{ bigdata_dir_scripts }}", dest: "{{ bigdata_env_dir }}/scripts" }
    - { src: "{{ bigdata_dir_scripts }}/bigadm.sh", dest: "{{ bigdata_dir }}/bigadm.sh" }
+   - { src: "{{ bigdata_dir_scripts }}/bigdata-user-profile.sh", dest: "{{ bigdata_dir }}/bigdata-user-profile.sh" }
 #  when: not hadoop_installed_status.stat.exists
 
 - name: Setting-up Executable permissions to scripts folders

@@ -12,7 +12,7 @@ sparkms_port=7077
 yarn_port=8032
 
 bigdata_pids_dir={{ bigdata_dir }}/pids
-bigdata_log_dir={{ bigdata_dir }}/log
+bigdata_log_dir={{ bigdata_dir }}/logs
 bigdata_log_file=$bigdata_log_dir/bigdata.log
 hive_max_heap="-Xmx4g"
 

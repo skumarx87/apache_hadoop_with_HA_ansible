@@ -16,3 +16,7 @@
 
 - include: download_kafka.yml
   when: download_kafka
+
+- include: download_impala.yml
+  when: download_impala
+

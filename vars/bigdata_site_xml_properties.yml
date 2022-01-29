@@ -1,3 +1,3 @@
-NAMENODE_HOSTNAME: "hnm1.tanu.com"
+NAMENODE_HOSTNAME: "laksha.home.com"
 DFS_REPLICATION_LEVEL: "3"
-FS_DEFAULT_NAME: "hdfs://hnm1.tanu.com:9000"
+FS_DEFAULT_NAME: "hdfs://laksha.home.com:9000"

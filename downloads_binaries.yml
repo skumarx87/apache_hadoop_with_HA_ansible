@@ -12,6 +12,7 @@
     download_kafka: true
     download_spark: true
     download_derby: true
+    download_impala: true
 #  become: true
   
   roles:

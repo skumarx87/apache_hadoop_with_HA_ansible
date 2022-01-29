@@ -1,0 +1,59 @@
+- name: Checking impala already installed or not
+  stat:
+    path: "{{ bigdata_new_release_dir }}/apache-impala-{{ impala_version }}-bin"
+  register: impala_installed_status
+
+- name: Display all variables/facts known for a host
+  debug:
+    msg: "{% if impala_installed_status.stat.exists %} Impala is already installed {% else %} Impala not installed {% endif %}"
+
+- name: Check impala archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ impala_file }}"
+  register: impala_download_file
+  when: not impala_installed_status.stat.exists
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  register: dir_creation_status
+  when: not impala_installed_status.stat.exists
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ bigdata_dir }}"
+     - "{{ bigdata_env_dir }}"
+     - "{{ bigdata_new_release_dir }}"
+
+- name: Transfer Impala binaries
+  copy: src={{ tmp_dir }}/{{ impala_file }} dest={{ tmp_dir_cache }}/{{ impala_file }}
+  when: not impala_installed_status.stat.exists
+
+
+- name: "Moving Files workspace"
+  command: mv {{ tmp_dir_cache }}/{{ impala_file }} {{ tmp_dir }}/{{ impala_file }}
+  when: not impala_installed_status.stat.exists
+
+- name: Unzip Impala
+  shell: "tar zxf {{ tmp_dir }}/{{ impala_file }} -C {{ bigdata_new_release_dir }}"
+  when: not impala_installed_status.stat.exists
+
+- name: "Creating impala Env soft link"
+  file:
+   src: "{{ bigdata_new_release_dir }}/apache-impala-{{ impala_version }}" 
+   dest: "{{ bigdata_env_dir }}/impala"
+   state: link
+#  when: not impala_installed_status.stat.exists
+
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/impala/bin"
+
