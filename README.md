@@ -4,8 +4,8 @@
 mkdir -p  /user/bigdata
 mkdir softwares
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-Miniconda3-latest-Linux-x86_64.sh
-export PATH=$PATH:/user/bigdata/miniconda3/bin
+bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/bigdata/Miniconda3
+export PATH=/user/bigdata/Miniconda3/bin:$PATH
 conda create -n ansible
 source activate ansible
 pip install ansible
