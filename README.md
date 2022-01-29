@@ -16,8 +16,8 @@ yum -y install git-core net-tools sshpass wget
 ```
 ### Create ansbile project to run ad-hoc commands all the hosts
 ```
-mkdir -p /user/bigdata/ansibleProjects /user/bigdata/ansibleProjects/{files,playbooks}
-cd /user/bigdata/ansibleProjects/sshpass/files
+mkdir -p /usr/bigdata/ansibleProjects /usr/bigdata/ansibleProjects/{files,playbooks}
+cd /usr/bigdata/ansibleProjects/sshpass/files
 
 ## create hosts file and include all the hostnames
 (ansible) [hadoop@hmn1 files]$ cat hosts
@@ -36,7 +36,7 @@ ansible all -u root --ask-pass -m ping
 ## command to install yum packages
 ansible all -u root --ask-pass -a "yum -y install git-core net-tools sshpass wget"
 ######## set the variable 
-export ANSIBLE_CONFIG=/user/bigdata/ansibleProjects/sshpass/files
+export ANSIBLE_CONFIG=/usr/bigdata/ansibleProjects/sshpass/files
 ```
 
 
