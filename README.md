@@ -9,6 +9,7 @@ export PATH=/usr/bigdata/Miniconda3/bin:$PATH
 /usr/bigdata/Miniconda3/bin/conda create -n ansible -y
 source activate ansible
 pip install ansible
+# Using root privilege 
 yum -y install git-core net-tools sshpass wget
 ```
 ### Create ansbile project to run ad-hoc commands all the hosts
