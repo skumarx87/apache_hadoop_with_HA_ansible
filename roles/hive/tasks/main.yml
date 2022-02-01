@@ -3,3 +3,6 @@
 - include: install_hive.yml
   when: install_hive
 
+- include_tasks: config_hive.yml
+  when: config_hive
+

@@ -1,4 +1,4 @@
-java_home: /usr/bigdata/jdk1.8.0_281
+java_home: /etc/alternatives/java_sdk 
 
 bigdata_dir: /usr/bigdata
 bigdata_env_dir: "{{ bigdata_dir }}/Envs"
