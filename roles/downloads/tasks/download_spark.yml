@@ -1,4 +1,4 @@
-- name: Checking Spark arcspark file exsit
+- name: Checking Spark archive file exsit
   stat:
     path: "{{ tmp_dir }}/{{ spark_file }}"
   register: spark_download_file

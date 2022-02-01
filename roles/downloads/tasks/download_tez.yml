@@ -1,4 +1,4 @@
-- name: Checking Hive arctez file exsit
+- name: Checking Tez archive file exsit
   stat:
     path: "{{ tmp_dir }}/{{ tez_file }}"
   register: tez_download_file
@@ -13,10 +13,11 @@
      - "{{ tmp_dir_cache }}"
 
 
-- name: Download Hive
+- name: Download Tez
   get_url:
     url: "{{ tez_url }}"
     dest: "{{ tmp_dir_cache }}/{{ tez_file }}"
+    validate_certs: no
   when: not tez_download_file.stat.exists
 
 - name: "Moving Files"

@@ -10,6 +10,7 @@
     install_hadoop: true
     config_hadoop: true
     install_hive: true
+    config_hive: true
     install_tez: true
   
   roles:

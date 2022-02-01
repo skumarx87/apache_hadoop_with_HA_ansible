@@ -1,4 +1,4 @@
-- name: Checking Kafka arckafka file exsit
+- name: Checking Kafka archive file exsit
   stat:
     path: "{{ tmp_dir }}/{{ kafka_file }}"
   register: kafka_download_file
@@ -17,6 +17,7 @@
   get_url:
     url: "{{ kafka_url }}"
     dest: "{{ tmp_dir_cache }}/{{ kafka_file }}"
+    validate_certs: no
   when: not kafka_download_file.stat.exists
 
 - name: "Moving Files"
