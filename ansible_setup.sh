@@ -1,5 +1,6 @@
 mkdir -p  /usr/bigdata/softwares
-cd 
+mkdir -p /usr/bigdata/ansibleProjects/files
+cd /usr/bigdata/softwares 
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/bigdata/Miniconda3
 export PATH=/usr/bigdata/Miniconda3/bin:$PATH
