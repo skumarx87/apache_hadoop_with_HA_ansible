@@ -1,3 +1,9 @@
-NAMENODE_HOSTNAME: "laksha.home.com"
+BIGDATA_DIR: "/usr/bigdata"
+NAMENODE_HOSTNAME: "laksha.tanu.com"
 DFS_REPLICATION_LEVEL: "3"
-FS_DEFAULT_NAME: "hdfs://laksha.home.com:9000"
+FS_DEFAULT_NAME: "hdfs://laksha.tanu.com:9000"
+
+#Spark
+
+SPARK_LOCAL_DIR: "/tmp/" 
+SPARK_SECRET: "test123"

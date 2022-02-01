@@ -1,0 +1,15 @@
+---
+
+- name: Copy Spark spark-hive-site.xml 
+  template: src=spark-hive-site.xml dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
+
+- name: Copy spark-defaults.conf
+  template: src=spark-defaults.conf dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
+
+- name: Copy Spark spark-env.sh
+  template: src=spark-env.sh dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
+
+- name: Copy Spark spark.log4j.properties 
+  template: src=spark.log4j.properties dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
+
+

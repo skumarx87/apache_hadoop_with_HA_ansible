@@ -1,0 +1,59 @@
+- name: Checking spark already installed or not
+  stat:
+    path: "{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop"
+  register: spark_installed_status
+
+- name: Display all variables/facts known for a host
+  debug:
+    msg: "{% if spark_installed_status.stat.exists %} Spark is already installed {% else %} Spark not installed {% endif %}"
+
+- name: Check spark archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ spark_file }}"
+  register: spark_download_file
+  when: not spark_installed_status.stat.exists
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  register: dir_creation_status
+  when: not spark_installed_status.stat.exists
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ bigdata_dir }}"
+     - "{{ bigdata_env_dir }}"
+     - "{{ bigdata_new_release_dir }}"
+
+- name: Transfer Spark binaries
+  copy: src={{ tmp_dir }}/{{ spark_file }} dest={{ tmp_dir_cache }}/{{ spark_file }}
+  when: not spark_installed_status.stat.exists
+
+
+- name: "Moving Files workspace"
+  command: mv {{ tmp_dir_cache }}/{{ spark_file }} {{ tmp_dir }}/{{ spark_file }}
+  when: not spark_installed_status.stat.exists
+
+- name: Unzip Spark
+  shell: "tar zxf {{ tmp_dir }}/{{ spark_file }} -C {{ bigdata_new_release_dir }}"
+  when: not spark_installed_status.stat.exists
+
+- name: "Creating spark Env soft link"
+  file:
+   src: "{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop" 
+   dest: "{{ bigdata_env_dir }}/spark"
+   state: link
+#  when: not spark_installed_status.stat.exists
+
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/spark/bin"
+
