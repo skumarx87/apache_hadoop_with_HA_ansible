@@ -20,3 +20,6 @@
 - include: download_impala.yml
   when: download_impala
 
+- include: download_zookeeper.yml 
+  when: download_zookeeper
+

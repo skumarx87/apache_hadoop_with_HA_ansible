@@ -10,9 +10,10 @@ hivesrv_port=10000
 hivems_port=9083
 sparkms_port=7077
 yarn_port=8032
+zookeeper_port=2181
 
-bigdata_pids_dir={{ bigdata_dir }}/pids
-bigdata_log_dir={{ bigdata_dir }}/logs
+bigdata_pids_dir=/usr/bigdata/pids
+bigdata_log_dir=/usr/bigdata/logs
 bigdata_log_file=$bigdata_log_dir/bigdata.log
 hive_max_heap="-Xmx4g"
 
@@ -33,6 +34,14 @@ function log {
     echo -e "$1"
 
 }
+
+function start_zookeeper {
+	$ZOOKEEPER_HOME/bin/zkServer.sh start
+}
+function stop_zookeeper {
+        $ZOOKEEPER_HOME/bin/zkServer.sh stop
+}
+
 
 function discover_process_by_port {
 
@@ -222,6 +231,7 @@ function hadoop_all_status {
 	status_line 'Hive Metastore' $hivems_port
 	status_line 'Hive Server' $hivesrv_port
 	status_line 'Spark Master' $sparkms_port
+	status_line 'Zookeeper' $zookeeper_port
 }
 
 function start_spark_master {
@@ -287,5 +297,11 @@ case "$1" in
 	;;
 	stop_spark)
 		stop_spark
+	;;
+	start_zookeeper)
+		start_zookeeper
+	;;
+	stop_zookeeper)
+		stop_zookeeper
 	;;
 	esac

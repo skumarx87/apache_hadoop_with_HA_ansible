@@ -29,6 +29,7 @@ export PATH=$PATH:$KAFKA_HOME/bin
 
 export ZOOKEEPER_HOME=$BIGDATA_ROOT/Envs/zookeeper
 export PATH=$PATH:$ZOOKEEPER_HOME/bin
+export ZOO_LOG_DIR=$BIGDATA_ROOT/logs
 
 export PATH=$PATH:$BIGDATA_ROOT/thirdparts/Miniconda3/bin
 export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9-src.zip:$PYTHONPATH

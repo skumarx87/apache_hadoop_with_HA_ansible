@@ -1,0 +1,4 @@
+---
+
+- name: Copy zoo.cfg 
+  template: src=zoo.cfg dest="{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin/conf/" mode=644

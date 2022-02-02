@@ -13,6 +13,7 @@
     download_spark: true
     download_derby: true
     download_impala: true
+    download_zookeeper: true
 #  become: true
   
   roles:
