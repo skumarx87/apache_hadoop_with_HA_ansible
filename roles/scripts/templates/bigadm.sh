@@ -11,6 +11,7 @@ hivems_port=9083
 sparkms_port=7077
 yarn_port=8032
 zookeeper_port=2181
+kafka_broker_port=9092
 
 bigdata_pids_dir=/usr/bigdata/pids
 bigdata_log_dir=/usr/bigdata/logs
@@ -33,6 +34,35 @@ function log {
 
     echo -e "$1"
 
+}
+
+function start_kafka_broker {
+
+    log "START KAFKA BROKER"
+    LOG_DIR=$bigdata_log_dir nohup $KAFKA_HOME/bin/kafka-server-start.sh  \
+                $KAFKA_HOME/config/server.properties \
+                > $bigdata_log_dir/kafkar_broker_nohup.log 2>&1 &
+
+        for i in `seq 1 10`;
+                do
+                sleep 3
+                pid=$(discover_process_by_port $kafka_broker_port)
+                if [ "$pid" != '' ]; then
+                        pid_file=$bigdata_pids_dir/kafka_broker_port.pid
+                        echo "$pid" > $pid_file
+                        log "Kafka Broker started, pid $pid written to $pid_file"
+			status_line 'Kafka Broker' $kafka_broker_port
+                        break
+                fi
+        done
+
+
+}
+
+function stop_kafka_broker {
+	LOG_DIR=$bigdata_log_dir $KAFKA_HOME/bin/kafka-server-stop.sh
+	sleep 3
+	status_line 'Kafka Broker' $kafka_broker_port
 }
 
 function start_zookeeper {
@@ -232,6 +262,7 @@ function hadoop_all_status {
 	status_line 'Hive Server' $hivesrv_port
 	status_line 'Spark Master' $sparkms_port
 	status_line 'Zookeeper' $zookeeper_port
+	status_line 'Kafka Broker' $kafka_broker_port
 }
 
 function start_spark_master {
@@ -303,5 +334,11 @@ case "$1" in
 	;;
 	stop_zookeeper)
 		stop_zookeeper
+	;;
+	start_kafka_broker)
+		start_kafka_broker
+	;;
+	stop_kafka_broker)
+		stop_kafka_broker
 	;;
 	esac
