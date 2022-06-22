@@ -2,7 +2,7 @@
 
     <property>
         <name>javax.jdo.option.ConnectionURL</name>
-        <value>jdbc:derby:;databaseName=/data/bigdata-{{ bigdata_release_version }}/hive/metastore_db/;create=true</value>
+        <value>jdbc:derby:;databaseName=/data/bigdata/data/hive/metastore_db/;create=true</value>
     </property>
 
     <property>
