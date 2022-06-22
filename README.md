@@ -77,6 +77,13 @@ ansible all -u root --ask-pass -a "yum -y install git-core net-tools sshpass wge
 ```
 * git clone https://github.com/skumarx87/apache_hadoop_with_HA_ansible.git
 * cd apache_hadoop_with_HA_ansible
+* update the vars/bigdata_site_xml_properties.yml
+   BIGDATA_DIR: "/usr/bigdata"
+   NAMENODE_HOSTNAME: "laksha.tanu.com"
+   DFS_REPLICATION_LEVEL: "3"
+   FS_DEFAULT_NAME: "hdfs://laksha.tanu.com:9000"
+   SPARK_LOCAL_DIR: "/tmp/"
+   SPARK_SECRET: "test123"
 * ./hadoop_install.sh
 ```
 
