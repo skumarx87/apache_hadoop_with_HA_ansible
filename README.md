@@ -15,13 +15,12 @@ yum --enablerepo=epel -y install sshpass
 yum -y install git-core net-tools sshpass wget
 ```
 ## Setup the SSH Key authentication for non-root account within server
-* ssh-keygen -t rsa
+* ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
 * chmod 0700 $HOME/.ssh
-* ssh-copy-id -i $HOME/.ssh/id_rsa.pub sathish@localohost
+* ssh-copy-id -i $HOME/.ssh/id_rsa.pub localhost
 ## Install OpenJDK Java  and git using below command
 * su - root
-* yum install -y java-1.8.0-openjdk.x86_64
-* yum install  -y java-1.8.0-openjdk-devel
+* yum install -y java-1.8.0-openjdk.x86_64 java-1.8.0-openjdk-devel
 ### Create ansbile project to run ad-hoc commands all the hosts
 ```
 mkdir -p /usr/bigdata/ansibleProjects /usr/bigdata/ansibleProjects/{files,playbooks}
