@@ -9,6 +9,7 @@ yum install epel-release
 yum --enablerepo=epel -y install sshpass
 yum -y install git-core net-tools sshpass wget
 mkdir -p  /usr/bigdata /usr/bigdata/softwares
+mkdir -p /usr/bigdata/data/{name_dir,data_dir}
 chown -R hadoop:hadoop /usr/bigdata
 ```
 ## Install and configure Ansible for managing all nodes from Master
