@@ -71,8 +71,8 @@ export ANSIBLE_CONFIG=/usr/bigdata/ansibleProjects/files
 ansible all -u root --ask-pass -m ping
 ## command to install yum packages
 ansible all -u root --ask-pass -a "yum -y install git-core net-tools sshpass wget"
-
-# Hadoop Installation
+```
+# Apache Hadoop Installation
 ## git code checkout
 ```
 * git clone https://github.com/skumarx87/apache_hadoop_with_HA_ansible.git
