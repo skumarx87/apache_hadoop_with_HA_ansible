@@ -1,18 +1,27 @@
 # apache_hadoop_with_HA
+
+## Root privilege setup
+```
+useradd hadoop
+password hadoop
+
+yum install epel-release
+yum --enablerepo=epel -y install sshpass
+yum -y install git-core net-tools sshpass wget
+mkdir -p  /usr/bigdata /usr/bigdata/softwares
+chown -R hadoop:hadoop /usr/bigdata
+```
 ## Install and configure Ansible for managing all nodes from Master
 ```
-mkdir -p  /usr/bigdata
-mkdir softwares
+su - hadoop
+cd /usr/bigdata/softwares
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/bigdata/Miniconda3
 export PATH=/usr/bigdata/Miniconda3/bin:$PATH
 /usr/bigdata/Miniconda3/bin/conda create -n ansible -y
 source activate ansible
 pip install ansible
-# Using root privilege 
-yum install epel-release
-yum --enablerepo=epel -y install sshpass
-yum -y install git-core net-tools sshpass wget
+
 ```
 ## Setup the SSH Key authentication for non-root account within server
 * ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
@@ -52,13 +61,17 @@ create ansible.cfg and add below lines
 inventory         = hosts
 host_key_checking = False
 ###############################
+```
+## Update Bash_profile variable
+```
+vi ~/.bash_profile
 ######## set the variable 
 export ANSIBLE_CONFIG=/usr/bigdata/ansibleProjects/files
 ##command to test the connection
 ansible all -u root --ask-pass -m ping
 ## command to install yum packages
 ansible all -u root --ask-pass -a "yum -y install git-core net-tools sshpass wget"
-```
+
 # Hadoop Installation
 ## git code checkout
 ```
