@@ -9,6 +9,13 @@
       <name>dfs.replication</name>
       <value>{{ DFS_REPLICATION_LEVEL }}</value>
    </property>
-
+  <property>
+      <name>dfs.name.dir</name>
+      <value>/usr/bigdata/data/name_dir</value>
+   </property>
+  <property>
+      <name>dfs.data.dir</name>
+      <value>/usr/bigdata/data/name_dir</value>
+   </property>
 </configuration>
 
