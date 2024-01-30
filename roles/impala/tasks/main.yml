@@ -1,5 +1,5 @@
 ---
 
-- include: install_impala.yml
+- include_tasks install_impala.yml
   when: install_impala
 

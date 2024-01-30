@@ -1,8 +1,6 @@
 ---
-
-- include: install_spark.yml
+- include_tasks: install_spark.yml
   when: install_spark
-
 - include_tasks: config_spark.yml
   when: config_spark
 

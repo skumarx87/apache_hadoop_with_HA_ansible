@@ -1,5 +1,4 @@
 ---
-
-- include: install_derby.yml
+- include_tasks: install_derby.yml
   when: install_derby
 

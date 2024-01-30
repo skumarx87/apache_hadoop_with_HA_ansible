@@ -1,5 +1,3 @@
 ---
-
-- include: install_tez.yml
+- include_tasks: install_tez.yml
   when: install_tez
-

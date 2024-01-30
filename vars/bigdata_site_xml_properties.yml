@@ -1,7 +1,7 @@
 BIGDATA_DIR: "/usr/bigdata"
-NAMENODE_HOSTNAME: "laksha.tanu.com"
+NAMENODE_HOSTNAME: "sparsmaster.example.com"
 DFS_REPLICATION_LEVEL: "3"
-FS_DEFAULT_NAME: "hdfs://laksha.tanu.com:9000"
+FS_DEFAULT_NAME: "hdfs://sparsmaster.example.com:9000"
 
 #Spark
 

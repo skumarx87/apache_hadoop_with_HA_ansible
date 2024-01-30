@@ -1,25 +1,17 @@
 ---
-- include: download_hadoop.yml 
+- include_tasks: download_hadoop.yml
   when: download_hadoop
-
-- include: download_hive.yml 
+- include_tasks: download_hive.yml
   when: download_hive
-
-- include: download_tez.yml
+- include_tasks: download_tez.yml
   when: download_tez
-
-- include: download_spark.yml
+- include_tasks: download_spark.yml
   when: download_spark
-
-- include: download_derby.yml
+- include_tasks: download_derby.yml
   when: download_derby
-
-- include: download_kafka.yml
+- include_tasks: download_kafka.yml
   when: download_kafka
-
-- include: download_impala.yml
+- include_tasks: download_impala.yml
   when: download_impala
-
-- include: download_zookeeper.yml 
+- include_tasks: download_zookeeper.yml
   when: download_zookeeper
-
