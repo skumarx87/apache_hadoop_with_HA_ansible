@@ -63,6 +63,16 @@ inventory         = hosts
 host_key_checking = False
 ###############################
 ```
+### Edit the roles/hadoop/templates/workers 
+```
+sworker1.example.com
+sworker2.example.com
+```
+### Edit the roles/spark/templates/slaves 
+```
+sworker1.example.com
+sworker2.example.com
+```
 ## Update Bash_profile variable
 ```
 vi ~/.bash_profile
