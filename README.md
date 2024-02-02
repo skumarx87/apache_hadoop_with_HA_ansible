@@ -40,21 +40,34 @@ cd /usr/bigdata/ansibleProjects/files
 (ansible) [hadoop@hmn1 files]$ cat hosts
 ###################
 [default]
-laksha.home.com
+sparkmaster.example.com
 
 [buildserver]
-laksha.home.com
+sparkmaster.example.com
 
 [nameNode]
-laksha.home.com
+sparkmaster.example.com
 
 [dataNode]
-laksha.home.com
-tanush.home.com
+sworker1.example.com
+sworker2.example.com
 
 [hiveNode]
-laksha.home.com
+sparkmaster.example.com
+
+[sparkMaster]
+sparkmaster.example.com
+
+[sparkWorker]
+sworker1.example.com
+sworker2.example.com
+
+[zookeeperNode]
+sparkmaster.example.com
+sworker1.example.com
+sworker2.example.com
 ########################
+
 create ansible.cfg and add below lines
 
 (ansible) [hadoop@hmn1 files]$ cat ansible.cfg
