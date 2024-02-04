@@ -6,10 +6,13 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.inventory.manager import InventoryManager
 import subprocess
 import re
+import time
 
 class bigadm:
     def __init__(self):
         self.logger = logging.getLogger("bigadm")
+        self.hive_metastore_port = 9083 
+        self.hiveserver2_port = 10000
         logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s - %(levelname)s - [%(name)s] - %(message)s',
                 datefmt='%Y-%m-%d %H:%M:%S')
@@ -35,11 +38,12 @@ class bigadm:
                 ]
     def run_command_over_ssh(self,cmd):
         try:
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
             stdout, stderr = process.communicate(timeout=5)
             #self.logger.info(stdout.strip())
+            #self.logger.info(stderr.strip())
             if process.returncode == 0:
-                return stdout
+                return stdout.decode()
             else:
                 return None
 
@@ -107,9 +111,30 @@ class bigadm:
         if pid is not None:
             cmd = ['ssh',host,'ps','-p',pid]
             res=self.run_command_over_ssh(cmd)
-            is_running = self.check_string_pattern(res,process_name)
-            return is_running
+            if res is not None:
+                is_running = self.check_string_pattern(res,process_name)
+                return is_running
+            else:
+                return None
+        else:
+            return None
 
+    def hive_process_pid_writting(self,port,pid_file,process_name):
+        is_pid_launched = False
+        start_time = time.time()
+        while time.time() - start_time < 20:
+            time.sleep(1)
+            cmd = ['lsof','-t','-i:{}'.format(port)]
+            out=self.run_command_over_ssh(cmd)
+            self.logger.info("waiting for {} Process to launch ({})s".format(process_name,int(time.time() - start_time)))
+            if out is not None:
+                is_pid_launched=self.is_check_pid_running(int(out))
+                if is_pid_launched:
+                    break
+        if is_pid_launched:
+            self.logger.info("{} server running...".format(process_name))
+        else:
+            self.logger.warning("{} is not started or taking long time to start".format(process_name))
 
 
 
@@ -185,12 +210,15 @@ class bigadm:
                     self.logger.info("zookeeper Node {} is not Running...".format(host))
 
     def hive_service(self,action):
+        env_hive_home = os.environ.get('HIVE_HOME')
+        hm_log_file = "{}/logs/hivemeta_nohup.log".format(self.env_bigdata_root_value)
+        hive_log_path = "{}/logs".format(self.env_bigdata_root_value)
+        hive_cmd="{}/bin/hive".format(env_hive_home)
+        hs2_pid_file = "{}/pids/hive_server.pid".format(self.env_bigdata_root_value)
+        hm_pid_file = "{}/pids/hive_metastore.pid".format(self.env_bigdata_root_value)
+        hs2_hosts = self.parse_ansible_inventory('hiveserver2Node')
+        hm_hosts = self.parse_ansible_inventory('hivemetastoreNode')
         if action == 'status':
-            hs2_pid_file = "{}/pids/hive_server.pid".format(self.env_bigdata_root_value)
-            hm_pid_file = "{}/pids/hive_metastore.pid".format(self.env_bigdata_root_value)
-            hs2_hosts = self.parse_ansible_inventory('hiveserver2Node')
-            hm_hosts = self.parse_ansible_inventory('hivemetastoreNode')
-
             for host in hs2_hosts:
                 is_running = self.check_process_of_pid_over_ssh(host,hs2_pid_file,'java')
                 if is_running:
@@ -203,6 +231,47 @@ class bigadm:
                     self.logger.info("hivemetastore Node {} Running...".format(host))
                 else:
                     self.logger.info("hivemetastore Node {} is not Running...".format(host))
+        elif action == 'start':
+            for host in hm_hosts:
+                #cmd = ['ssh',host,'nohup',hive_cmd,'--service','metastore','&']
+                cmd = """ssh hadoop@{} source ~/.bash_profile;nohup {} --service metastore \
+                --hiveconf hive.log.dir={} >{} 2>&1 &
+                """.format(host,hive_cmd,hive_log_path,hm_log_file)
+                self.logger.info("Starting hivemetastore on node: {}".format(host))
+                self.logger.info(cmd)
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                self.hive_process_pid_writting(self.hive_metastore_port,hm_pid_file,"hivemetastore")
+                #time.sleep(10)
+                '''
+                is_pid_launched = False
+                start_time = time.time()
+                while time.time() - start_time < 20:
+                    time.sleep(1)
+                    cmd = ['lsof','-t','-i:{}'.format(self.hive_metastore_port)]
+                    out=self.run_command_over_ssh(cmd)
+                    self.logger.info("waiting for Hivemetastore Process to launch ({})s".format(int(time.time() - start_time)))
+                    if out is not None:
+                        is_pid_launched=self.is_check_pid_running(int(out))
+                        if is_pid_launched:
+                            break
+                if is_pid_launched:
+                    self.logger.info("Hivemestore server running...")
+                else:
+                    self.logger.warning("Hivemestore is not started or taking long time to start")
+                '''
+
+
+
+
+                #code=process.wait()
+                #print(code)
+                #stdout, stderr = process.communicate(timeout=5)
+                #self.logger.info(stdout.strip())
+                #self.logger.info(stderr.strip())
+                #out=self.run_command_over_ssh(cmd)
+        #self.hive_service('status')
+
+
 
     def spark_service(self,action):
         if action == 'status':
@@ -253,6 +322,9 @@ class bigadm:
                 if args.start.lower() == 'hdfs':
                     self.logger.info("Staring hdfs services")
                     self.hdfs_service('start')
+                elif args.start.lower() == 'hive':
+                    self.logger.info("Staring hive services")
+                    self.hive_service('start')
             else:
                 self.logger.error("{} service doesn't exist".format(args.start))
 
