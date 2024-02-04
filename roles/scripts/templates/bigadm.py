@@ -146,15 +146,16 @@ class bigadm:
                 else:
                     self.logger.info("Name Node {} is not Running...".format(host))
                     
-                
-            '''
-                cmd = ['ssh',host,' ','cat',jn_pid_file]
-                pid=self.run_command_over_ssh(cmd)
-                if pid is not None:
-                    cmd = ['ssh',host,'ps','-p',pid]
-                    self.run_command_over_ssh(cmd)
-            '''
-
+    def zookeeper_service(self,action):
+        if action == 'status':
+            zk_pid_file = "{}/Envs/zookeeper/dataDir/zookeeper_server.pid".format(self.env_bigdata_root_value)
+            zk_hosts = self.parse_ansible_inventory('zookeeperNode')
+            for host in zk_hosts:
+                is_running = self.check_process_of_pid_over_ssh(host,zk_pid_file,'java')
+                if is_running:
+                    self.logger.info("zookeeper Node {} Running...".format(host))
+                else:
+                    self.logger.info("zookeeper Node {} is not Running...".format(host))
 
 
     def main(self,args):
@@ -196,19 +197,23 @@ class bigadm:
                 self.logger.info("Stoping hdfs services")
                 self.hdfs_service('stop')
             else:
-                self.logger.error("{} service doesn't exist".format(args.start))
+                self.logger.error("{} service doesn't exist".format(args.stop))
     
 
     def status_service(self,args,all_service=False):
-        self.logger.info('Starting service')
         if all_service:
-            self.logger.info("Staring all services")
+            self.logger.info("Checking all service status")
+            self.hdfs_service('status')
+            self.zookeeper_service('status')
         else:
             if args.status.lower() in self.allowed_service:
-                self.logger.info("Staring hdfs services")
-                self.hdfs_service('status')
+                self.logger.info("Checking {} service status".format(args.status))
+                if args.status.lower() == 'hdfs':
+                    self.hdfs_service('status')
+                elif args.status.lower() == 'zookeeper':
+                    self.zookeeper_service('status')
             else:
-                self.logger.error("{} service doesn't exist".format(args.start))
+                self.logger.error("{} service doesn't exist".format(args.status))
     
 
 
