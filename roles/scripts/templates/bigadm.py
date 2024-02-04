@@ -265,7 +265,10 @@ class bigadm:
 
     def spark_service(self,action):
         env_spark_home = os.environ.get('SPARK_HOME')
-        sparkmaster_run_cmd = "{}sbin/start-master.sh".format(env_spark_home)
+        sparkmaster_start_cmd = "{}/sbin/start-master.sh".format(env_spark_home)
+        sparkmaster_stop_cmd = "{}/sbin/stop-master.sh".format(env_spark_home)
+        sparkworker_start_cmd = "{}/sbin/start-slaves.sh".format(env_spark_home)
+        sparkworker_stop_cmd = "{}/sbin/stop-slaves.sh".format(env_spark_home)
         sm_hosts = self.parse_ansible_inventory('sparkMaster')
         sw_hosts = self.parse_ansible_inventory('sparkWorker')
         if action == 'status':
@@ -285,11 +288,22 @@ class bigadm:
                 else:
                     self.logger.info("Spark worker Node {} is not Running...".format(host))
         if action == 'start':
+            spark_master_ha_hosts ="spark://"+",".join(str(item)+":7077" for item in sm_hosts)
             for host in sm_hosts:
                 self.logger.info("Starting Spark master node on {}".format(host))
-                cmd = ['ssh',host,sparkmaster_run_cmd]
+                cmd = ['ssh',host,sparkmaster_start_cmd]
                 out=self.run_command_over_ssh(cmd)
-
+                self.logger.info("Starting Spark worker node on {}".format(host))
+                cmd = ['ssh',host,sparkworker_start_cmd,spark_master_ha_hosts]
+                out=self.run_command_over_ssh(cmd)
+            '''
+            spark_master_ha_hosts ="spark://"+",".join(str(item)+":7077" for item in sm_hosts)
+            for host in sm_hosts:
+                self.logger.info("Starting Spark worker node on {}".format(host))
+                cmd = ['ssh',host,sparkworker_start_cmd,spark_master_ha_hosts]
+                print(cmd)
+                out=self.run_command_over_ssh(cmd)
+            '''
 
 
 
