@@ -40,8 +40,8 @@ class bigadm:
         try:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
             stdout, stderr = process.communicate(timeout=5)
-            #self.logger.info(stdout.strip())
-            #self.logger.info(stderr.strip())
+            self.logger.info(stdout.strip())
+            self.logger.info(stderr.strip())
             if process.returncode == 0:
                 return stdout.decode()
             else:
@@ -296,14 +296,22 @@ class bigadm:
                 self.logger.info("Starting Spark worker node on {}".format(host))
                 cmd = ['ssh',host,sparkworker_start_cmd,spark_master_ha_hosts]
                 out=self.run_command_over_ssh(cmd)
-            '''
+
+        if action == 'stop':
             spark_master_ha_hosts ="spark://"+",".join(str(item)+":7077" for item in sm_hosts)
             for host in sm_hosts:
-                self.logger.info("Starting Spark worker node on {}".format(host))
-                cmd = ['ssh',host,sparkworker_start_cmd,spark_master_ha_hosts]
+                #self.logger.info("Stopping Spark workers node on {}".format(host))
+                #cmd = ['ssh',host,sparkworker_stop_cmd,spark_master_ha_hosts]
+                self.logger.info("Stopping Spark master node on {}".format(host))
+                cmd = ['ssh',host,sparkmaster_stop_cmd]
+                out=self.run_command_over_ssh(cmd)
+
+            spark_master_ha_hosts ="spark://"+",".join(str(item)+":7077" for item in sm_hosts)
+            for host in sw_hosts:
+                self.logger.info("Stopping Spark worker node on {}".format(host))
+                cmd = ['ssh',host,sparkworker_stop_cmd,spark_master_ha_hosts]
                 print(cmd)
                 out=self.run_command_over_ssh(cmd)
-            '''
 
 
 
@@ -351,6 +359,7 @@ class bigadm:
             if args.stop.lower() in self.allowed_service:
                 self.logger.info("Stoping hdfs services")
                 self.hdfs_service('stop')
+                self.spark_service("stop")
             else:
                 self.logger.error("{} service doesn't exist".format(args.stop))
     
