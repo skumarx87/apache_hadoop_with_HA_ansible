@@ -330,6 +330,9 @@ case "$1" in
 	start_hdfs)
 		start_hdfs
 	;;
+	start_hive)
+		start_hive
+	;;
 	start_spark)
 		start_spark
 	;;

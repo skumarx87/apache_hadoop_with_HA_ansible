@@ -114,18 +114,16 @@ class bigadm:
 
 
     def hdfs_service(self,action):
+        env_hadoop_home = os.environ.get('HADOOP_HOME')
+        hadoop_daemon = "{}/sbin/hadoop-daemon.sh".format(env_hadoop_home)
+
+        nm_hosts = self.parse_ansible_inventory('nameNode')
+        dn_hosts = self.parse_ansible_inventory('dataNode')
+        jn_hosts = self.parse_ansible_inventory('journalNode')
         if action == 'status':
             nm_pid_file = "{}/pids/hadoop-hadoop-namenode.pid".format(self.env_bigdata_root_value)
             dn_pid_file = "{}/pids/hadoop-hadoop-datanode.pid".format(self.env_bigdata_root_value)
             jn_pid_file = "{}/pids/hadoop-hadoop-journalnode.pid".format(self.env_bigdata_root_value)
-            nm_hosts = self.parse_ansible_inventory('nameNode')
-            dn_hosts = self.parse_ansible_inventory('dataNode')
-            jn_hosts = self.parse_ansible_inventory('journalNode')
-            #print(nm_hosts)
-            #print(dn_hosts)
-            #print(jn_hosts)
-
-            #nn_pid = self.read_pid_from_file(nn_pid_file)
             for host in jn_hosts:
                 is_running = self.check_process_of_pid_over_ssh(host,jn_pid_file,'java')
                 if is_running:
@@ -145,6 +143,35 @@ class bigadm:
                     self.logger.info("Name Node {} Running...".format(host))
                 else:
                     self.logger.info("Name Node {} is not Running...".format(host))
+        elif action == 'start':
+            for host in nm_hosts:
+                cmd = ['ssh',host,hadoop_daemon,'start','namenode']
+                self.logger.info("Starting Namenode on node: {}".format(host))
+                out=self.run_command_over_ssh(cmd)
+            for host in dn_hosts:
+                cmd = ['ssh',host,hadoop_daemon,'start','datanode']
+                self.logger.info("Starting datanode on node: {}".format(host))
+                out=self.run_command_over_ssh(cmd)
+            for host in jn_hosts:
+                cmd = ['ssh',host,hadoop_daemon,'start','journalnode']
+                self.logger.info("Starting journalnode on node: {}".format(host))
+                out=self.run_command_over_ssh(cmd)
+            self.hdfs_service('status')
+        elif action == 'stop':
+            for host in nm_hosts:
+                cmd = ['ssh',host,hadoop_daemon,'stop','namenode']
+                self.logger.info("Stopping Namenode on node: {}".format(host))
+                out=self.run_command_over_ssh(cmd)
+            for host in dn_hosts:
+                cmd = ['ssh',host,hadoop_daemon,'stop','datanode']
+                self.logger.info("Stopping datanode on node: {}".format(host))
+                out=self.run_command_over_ssh(cmd)
+            for host in jn_hosts:
+                cmd = ['ssh',host,hadoop_daemon,'stop','journalnode']
+                self.logger.info("Stopping journalnode on node: {}".format(host))
+                out=self.run_command_over_ssh(cmd)
+            self.hdfs_service('status')
+                
                     
     def zookeeper_service(self,action):
         if action == 'status':
@@ -156,6 +183,46 @@ class bigadm:
                     self.logger.info("zookeeper Node {} Running...".format(host))
                 else:
                     self.logger.info("zookeeper Node {} is not Running...".format(host))
+
+    def hive_service(self,action):
+        if action == 'status':
+            hs2_pid_file = "{}/pids/hive_server.pid".format(self.env_bigdata_root_value)
+            hm_pid_file = "{}/pids/hive_metastore.pid".format(self.env_bigdata_root_value)
+            hs2_hosts = self.parse_ansible_inventory('hiveserver2Node')
+            hm_hosts = self.parse_ansible_inventory('hivemetastoreNode')
+
+            for host in hs2_hosts:
+                is_running = self.check_process_of_pid_over_ssh(host,hs2_pid_file,'java')
+                if is_running:
+                    self.logger.info("hiveserver2 Node {} Running...".format(host))
+                else:
+                    self.logger.info("hiveserver2 Node {} is not Running...".format(host))
+            for host in hm_hosts:
+                is_running = self.check_process_of_pid_over_ssh(host,hm_pid_file,'java')
+                if is_running:
+                    self.logger.info("hivemetastore Node {} Running...".format(host))
+                else:
+                    self.logger.info("hivemetastore Node {} is not Running...".format(host))
+
+    def spark_service(self,action):
+        if action == 'status':
+            sm_pid_file = "{}/pids/spark-hadoop-org.apache.spark.deploy.master.Master-1.pid".format(self.env_bigdata_root_value)
+            sw_pid_file = "{}/pids/spark-hadoop-org.apache.spark.deploy.worker.Worker-1.pid".format(self.env_bigdata_root_value)
+            sm_hosts = self.parse_ansible_inventory('sparkMaster')
+            sw_hosts = self.parse_ansible_inventory('sparkWorker')
+
+            for host in sm_hosts:
+                is_running = self.check_process_of_pid_over_ssh(host,sm_pid_file,'java')
+                if is_running:
+                    self.logger.info("Spark master Node {} Running...".format(host))
+                else:
+                    self.logger.info("Spark master Node {} is not Running...".format(host))
+            for host in sw_hosts:
+                is_running = self.check_process_of_pid_over_ssh(host,sw_pid_file,'java')
+                if is_running:
+                    self.logger.info("Spark worker Node {} Running...".format(host))
+                else:
+                    self.logger.info("Spark worker Node {} is not Running...".format(host))
 
 
     def main(self,args):
@@ -183,8 +250,9 @@ class bigadm:
             self.logger.info("Staring all services")
         else:
             if args.start.lower() in self.allowed_service:
-                self.logger.info("Staring hdfs services")
-                self.hdfs_service('start')
+                if args.start.lower() == 'hdfs':
+                    self.logger.info("Staring hdfs services")
+                    self.hdfs_service('start')
             else:
                 self.logger.error("{} service doesn't exist".format(args.start))
 
@@ -205,6 +273,8 @@ class bigadm:
             self.logger.info("Checking all service status")
             self.hdfs_service('status')
             self.zookeeper_service('status')
+            self.hive_service('status')
+            self.spark_service('status')
         else:
             if args.status.lower() in self.allowed_service:
                 self.logger.info("Checking {} service status".format(args.status))
@@ -212,6 +282,11 @@ class bigadm:
                     self.hdfs_service('status')
                 elif args.status.lower() == 'zookeeper':
                     self.zookeeper_service('status')
+                elif args.status.lower() == 'hive':
+                    self.hive_service('status')
+                elif args.status.lower() == 'spark':
+                    self.spark_service('status')
+                
             else:
                 self.logger.error("{} service doesn't exist".format(args.status))
     
