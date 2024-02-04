@@ -37,3 +37,5 @@ export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9-src.zip:
 alias beeline="beeline -u jdbc:hive2://localhost:10000/default"
 alias bigdata=$BIGDATA_ROOT/bigadm.sh
 
+export SPARK_DEPLOYMENT_MODE=standalone
+

@@ -133,10 +133,10 @@ class bigadm:
                     break
         if is_pid_launched:
             self.logger.info("{} server running...".format(process_name))
+            with open(pid_file,'w') as file:
+                file.write(out)
         else:
             self.logger.warning("{} is not started or taking long time to start".format(process_name))
-
-
 
     def hdfs_service(self,action):
         env_hadoop_home = os.environ.get('HADOOP_HOME')
@@ -212,6 +212,7 @@ class bigadm:
     def hive_service(self,action):
         env_hive_home = os.environ.get('HIVE_HOME')
         hm_log_file = "{}/logs/hivemeta_nohup.log".format(self.env_bigdata_root_value)
+        hs2_log_file = "{}/logs/hiveserver_nohup.log".format(self.env_bigdata_root_value)
         hive_log_path = "{}/logs".format(self.env_bigdata_root_value)
         hive_cmd="{}/bin/hive".format(env_hive_home)
         hs2_pid_file = "{}/pids/hive_server.pid".format(self.env_bigdata_root_value)
@@ -241,27 +242,16 @@ class bigadm:
                 self.logger.info(cmd)
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 self.hive_process_pid_writting(self.hive_metastore_port,hm_pid_file,"hivemetastore")
-                #time.sleep(10)
-                '''
-                is_pid_launched = False
-                start_time = time.time()
-                while time.time() - start_time < 20:
-                    time.sleep(1)
-                    cmd = ['lsof','-t','-i:{}'.format(self.hive_metastore_port)]
-                    out=self.run_command_over_ssh(cmd)
-                    self.logger.info("waiting for Hivemetastore Process to launch ({})s".format(int(time.time() - start_time)))
-                    if out is not None:
-                        is_pid_launched=self.is_check_pid_running(int(out))
-                        if is_pid_launched:
-                            break
-                if is_pid_launched:
-                    self.logger.info("Hivemestore server running...")
-                else:
-                    self.logger.warning("Hivemestore is not started or taking long time to start")
-                '''
-
-
-
+            for host in hs2_hosts:
+                #cmd = ['ssh',host,'nohup',hive_cmd,'--service','metastore','&']
+                cmd = """ssh hadoop@{} source ~/.bash_profile;nohup {} --service hiveserver2 \
+                --hiveconf hive.log.dir={} >{} 2>&1 &
+                """.format(host,hive_cmd,hive_log_path,hs2_log_file)
+                self.logger.info("Starting hiveserver2 on node: {}".format(host))
+                self.logger.info(cmd)
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                self.hive_process_pid_writting(self.hiveserver2_port,hs2_pid_file,"hiveserver2")
+                
 
                 #code=process.wait()
                 #print(code)
@@ -274,11 +264,13 @@ class bigadm:
 
 
     def spark_service(self,action):
+        env_spark_home = os.environ.get('SPARK_HOME')
+        sparkmaster_run_cmd = "{}sbin/start-master.sh".format(env_spark_home)
+        sm_hosts = self.parse_ansible_inventory('sparkMaster')
+        sw_hosts = self.parse_ansible_inventory('sparkWorker')
         if action == 'status':
             sm_pid_file = "{}/pids/spark-hadoop-org.apache.spark.deploy.master.Master-1.pid".format(self.env_bigdata_root_value)
             sw_pid_file = "{}/pids/spark-hadoop-org.apache.spark.deploy.worker.Worker-1.pid".format(self.env_bigdata_root_value)
-            sm_hosts = self.parse_ansible_inventory('sparkMaster')
-            sw_hosts = self.parse_ansible_inventory('sparkWorker')
 
             for host in sm_hosts:
                 is_running = self.check_process_of_pid_over_ssh(host,sm_pid_file,'java')
@@ -292,6 +284,13 @@ class bigadm:
                     self.logger.info("Spark worker Node {} Running...".format(host))
                 else:
                     self.logger.info("Spark worker Node {} is not Running...".format(host))
+        if action == 'start':
+            for host in sm_hosts:
+                self.logger.info("Starting Spark master node on {}".format(host))
+                cmd = ['ssh',host,sparkmaster_run_cmd]
+                out=self.run_command_over_ssh(cmd)
+
+
 
 
     def main(self,args):
@@ -325,6 +324,8 @@ class bigadm:
                 elif args.start.lower() == 'hive':
                     self.logger.info("Staring hive services")
                     self.hive_service('start')
+                elif args.start.lower() == 'spark':
+                    self.spark_service('start')
             else:
                 self.logger.error("{} service doesn't exist".format(args.start))
 
