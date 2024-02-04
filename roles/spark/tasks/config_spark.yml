@@ -12,4 +12,6 @@
 - name: Copy Spark spark.log4j.properties 
   template: src=spark.log4j.properties dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
 
+- name: Copy slaves File
+  template: src=slaves dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
 

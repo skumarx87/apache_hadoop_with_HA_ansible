@@ -10,3 +10,6 @@
 
 - name: Copy Hadoop hadoop-env.sh 
   template: src=hadoop-env.sh dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
+
+- name: Copy workers file 
+  template: src=workers dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644

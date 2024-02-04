@@ -1,8 +1,6 @@
 ---
-
-- include_tasks install_zookeeper.yml
+- include_tasks: install_zookeeper.yml
   when: install_zookeeper
-
-- include_tasks config_zookeeper.yml
+- include_tasks: config_zookeeper.yml
   when: config_zookeeper
 

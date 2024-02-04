@@ -299,6 +299,8 @@ case "$1" in
 		log ''
 		start_spark
 		log ''
+		start_zookeeper
+		log ''
 	        hadoop_all_status	
 	;;
 	status)
@@ -314,14 +316,19 @@ case "$1" in
 		stop_hdfs
 		stop_hive
 		stop_spark
+		stop_zookeeper
 		hadoop_all_status
 	;;
 	stop_hive)
 		stop_hive
 	  	hadoop_all_status	
 	;;
+
 	stop_hdfs)
 		stop_hdfs
+	;;
+	start_hdfs)
+		start_hdfs
 	;;
 	start_spark)
 		start_spark
