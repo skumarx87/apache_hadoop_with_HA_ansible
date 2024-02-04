@@ -12,7 +12,7 @@ export HADOOP_OPTS=-Djava.library.path=$HADOOP_HOME/lib/native
 export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
 
 export HIVE_HOME=$BIGDATA_ROOT/Envs/hive
-export HIVE_CONF_DIR=$BIGDATA_ROOT/Envs/configuration
+export HIVE_CONF_DIR=$HIVE_HOME/conf
 export PATH=$HIVE_HOME/bin:$PATH
 
 export TEZ_HOME=$BIGDATA_ROOT/Envs/tez
