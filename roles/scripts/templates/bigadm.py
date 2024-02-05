@@ -40,8 +40,8 @@ class bigadm:
         try:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
             stdout, stderr = process.communicate(timeout=5)
-            self.logger.info(stdout.strip())
-            self.logger.info(stderr.strip())
+            #self.logger.info(stdout.strip())
+            #self.logger.info(stderr.strip())
             if process.returncode == 0:
                 return stdout.decode()
             else:
@@ -119,12 +119,12 @@ class bigadm:
         else:
             return None
 
-    def hive_process_pid_writting(self,port,pid_file,process_name):
+    def hive_process_pid_writting(self,host,port,pid_file,process_name):
         is_pid_launched = False
         start_time = time.time()
         while time.time() - start_time < 20:
             time.sleep(1)
-            cmd = ['lsof','-t','-i:{}'.format(port)]
+            cmd = ['ssh',host,'lsof','-t','-i:{}'.format(port)]
             out=self.run_command_over_ssh(cmd)
             self.logger.info("waiting for {} Process to launch ({})s".format(process_name,int(time.time() - start_time)))
             if out is not None:
@@ -235,22 +235,22 @@ class bigadm:
         elif action == 'start':
             for host in hm_hosts:
                 #cmd = ['ssh',host,'nohup',hive_cmd,'--service','metastore','&']
-                cmd = """ssh hadoop@{} source ~/.bash_profile;nohup {} --service metastore \
-                --hiveconf hive.log.dir={} >{} 2>&1 &
+                cmd = """ssh hadoop@{} "source ~/.bash_profile;nohup {} --service metastore \
+                --hiveconf hive.log.dir={} >{} 2>&1 &"
                 """.format(host,hive_cmd,hive_log_path,hm_log_file)
                 self.logger.info("Starting hivemetastore on node: {}".format(host))
                 self.logger.info(cmd)
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                self.hive_process_pid_writting(self.hive_metastore_port,hm_pid_file,"hivemetastore")
+                self.hive_process_pid_writting(host,self.hive_metastore_port,hm_pid_file,"hivemetastore")
             for host in hs2_hosts:
                 #cmd = ['ssh',host,'nohup',hive_cmd,'--service','metastore','&']
-                cmd = """ssh hadoop@{} source ~/.bash_profile;nohup {} --service hiveserver2 \
-                --hiveconf hive.log.dir={} >{} 2>&1 &
+                cmd = """ssh hadoop@{} "source ~/.bash_profile;nohup {} --service hiveserver2 \
+                --hiveconf hive.log.dir={} >{} 2>&1 &"
                 """.format(host,hive_cmd,hive_log_path,hs2_log_file)
                 self.logger.info("Starting hiveserver2 on node: {}".format(host))
                 self.logger.info(cmd)
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                self.hive_process_pid_writting(self.hiveserver2_port,hs2_pid_file,"hiveserver2")
+                self.hive_process_pid_writting(host,self.hiveserver2_port,hs2_pid_file,"hiveserver2")
                 
 
                 #code=process.wait()
@@ -310,7 +310,6 @@ class bigadm:
             for host in sw_hosts:
                 self.logger.info("Stopping Spark worker node on {}".format(host))
                 cmd = ['ssh',host,sparkworker_stop_cmd,spark_master_ha_hosts]
-                print(cmd)
                 out=self.run_command_over_ssh(cmd)
 
 
@@ -333,7 +332,7 @@ class bigadm:
             else:
                 self.status_service(args)
 
-
+    '''
     def start_service(self,args,all_service=False):
         self.logger.info('Starting service')
         if all_service:
@@ -350,20 +349,52 @@ class bigadm:
                     self.spark_service('start')
             else:
                 self.logger.error("{} service doesn't exist".format(args.start))
+    '''
+    def start_service(self,args,all_service=False):
+        if all_service:
+            self.logger.info("Checking all service start")
+            self.hdfs_service('start')
+            self.zookeeper_service('start')
+            self.hive_service('start')
+            self.spark_service('start')
+        else:
+            if args.start.lower() in self.allowed_service:
+                self.logger.info("Checking {} service start".format(args.start))
+                if args.start.lower() == 'hdfs':
+                    self.hdfs_service('start')
+                elif args.start.lower() == 'zookeeper':
+                    self.zookeeper_service('start')
+                elif args.start.lower() == 'hive':
+                    self.hive_service('start')
+                elif args.start.lower() == 'spark':
+                    self.spark_service('start')
+
+            else:
+                self.logger.error("{} service doesn't exist".format(args.start))
+
 
     def stop_service(self,args,all_service=False):
-        self.logger.info('Stoping service')
         if all_service:
-            self.logger.info("Stoping all services")
+            self.logger.info("Checking all service stop")
+            self.hdfs_service('stop')
+            self.zookeeper_service('stop')
+            self.hive_service('stop')
+            self.spark_service('stop')
         else:
             if args.stop.lower() in self.allowed_service:
-                self.logger.info("Stoping hdfs services")
-                self.hdfs_service('stop')
-                self.spark_service("stop")
+                self.logger.info("Checking {} service stop".format(args.stop))
+                if args.stop.lower() == 'hdfs':
+                    self.hdfs_service('stop')
+                elif args.stop.lower() == 'zookeeper':
+                    self.zookeeper_service('stop')
+                elif args.stop.lower() == 'hive':
+                    self.hive_service('stop')
+                elif args.stop.lower() == 'spark':
+                    self.spark_service('stop')
+
             else:
                 self.logger.error("{} service doesn't exist".format(args.stop))
     
-
     def status_service(self,args,all_service=False):
         if all_service:
             self.logger.info("Checking all service status")
