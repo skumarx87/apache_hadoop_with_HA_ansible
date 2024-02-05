@@ -76,7 +76,7 @@ class bigadm:
         except:
             self.logger.error("pid file not found")
             return None
-
+    '''
     def is_check_pid_running(self,pid):
         try:
             os.kill(pid,0)
@@ -84,7 +84,7 @@ class bigadm:
             return False
         else:
             return True
-
+    '''
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="adoop cluster managment script")
         parser.add_argument('--start',help='for starting service')
@@ -105,9 +105,13 @@ class bigadm:
             else:
                 return False
     
-    def check_process_of_pid_over_ssh(self,host,pid_file,process_name):
-        cmd = ['ssh',host,' ','cat',pid_file]
-        pid=self.run_command_over_ssh(cmd)
+    def check_process_of_pid_over_ssh(self,host,pid_file,process_name,PidFile=True):
+        if PidFile:
+            cmd = ['ssh',host,' ','cat',pid_file]
+            pid=self.run_command_over_ssh(cmd)
+        else:
+            pid = pid_file
+
         if pid is not None:
             cmd = ['ssh',host,'ps','-p',pid]
             res=self.run_command_over_ssh(cmd)
@@ -119,22 +123,37 @@ class bigadm:
         else:
             return None
 
+    def get_pid_from_port_overssh(self,host,port):
+        cmd = ['ssh',host,'lsof','-t','-i:{}'.format(port),'-sTCP:LISTEN']
+        pid=self.run_command_over_ssh(cmd)
+        if isinstance(pid, str) :
+            return pid.strip()
+        else:
+            return None
+
     def hive_process_pid_writting(self,host,port,pid_file,process_name):
         is_pid_launched = False
         start_time = time.time()
         while time.time() - start_time < 20:
             time.sleep(1)
-            cmd = ['ssh',host,'lsof','-t','-i:{}'.format(port)]
-            out=self.run_command_over_ssh(cmd)
             self.logger.info("waiting for {} Process to launch ({})s".format(process_name,int(time.time() - start_time)))
-            if out is not None:
-                is_pid_launched=self.is_check_pid_running(int(out))
+            pid=self.get_pid_from_port_overssh(host,port)
+            if pid is not None:
+                is_pid_launched=self.check_process_of_pid_over_ssh(host,pid,'java',PidFile=False)
                 if is_pid_launched:
                     break
+            '''
+            cmd = ['ssh',host,'lsof','-t','-i:{}'.format(port)]
+            out=self.run_command_over_ssh(cmd)
+            if isinstance(out, str) :
+                is_pid_launched=self.check_process_of_pid_over_ssh(host,out.strip(),'java',PidFile=False)
+                if is_pid_launched:
+                    break
+            '''
         if is_pid_launched:
+            cmd = ['ssh',host,'echo',pid,'>',pid_file]
+            self.run_command_over_ssh(cmd)
             self.logger.info("{} server running...".format(process_name))
-            with open(pid_file,'w') as file:
-                file.write(out)
         else:
             self.logger.warning("{} is not started or taking long time to start".format(process_name))
 
@@ -255,14 +274,42 @@ class bigadm:
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 self.hive_process_pid_writting(host,self.hiveserver2_port,hs2_pid_file,"hiveserver2")
                 
+        elif action == 'stop':
+            for host in hm_hosts:
+                pid=self.get_pid_from_port_overssh(host,self.hive_metastore_port)
+                #print(pid)
+                is_running = self.check_process_of_pid_over_ssh(host,pid,'java',PidFile=False)
+                #print(is_running)
+                if is_running:
+                    cmd = ['ssh',host,'kill','-9',pid]
+                    out=self.run_command_over_ssh(cmd)
+                    pid=self.get_pid_from_port_overssh(host,self.hive_metastore_port)
+                    is_running = self.check_process_of_pid_over_ssh(host,pid,'java',PidFile=False)
+                    if is_running:
+                        self.logger.warning("some issue with stopping hivemeastore on Node {} !!!".format(host))
+                    else:
+                        self.logger.info("hivemeastore on Node {} stopped".format(host))
+                else:
+                    self.logger.info("hivemeastore on Node {} already stopped".format(host))
 
-                #code=process.wait()
-                #print(code)
-                #stdout, stderr = process.communicate(timeout=5)
-                #self.logger.info(stdout.strip())
-                #self.logger.info(stderr.strip())
-                #out=self.run_command_over_ssh(cmd)
-        #self.hive_service('status')
+            for host in hs2_hosts:
+                pid=self.get_pid_from_port_overssh(host,self.hiveserver2_port)
+                is_running = self.check_process_of_pid_over_ssh(host,pid,'java',PidFile=False)
+                #print(pid)
+                #print(is_running)
+                if is_running:
+                    cmd = ['ssh',host,'kill','-9',pid]
+                    out=self.run_command_over_ssh(cmd)
+                    pid=self.get_pid_from_port_overssh(host,self.hiveserver2_port)
+                    is_running = self.check_process_of_pid_over_ssh(host,pid,'java',PidFile=False)
+                    if is_running:
+                        self.logger.warning("some issue with stopping hiveserver2 on Node {} !!!".format(host))
+                    else:
+                        self.logger.info("hiveserver2 on Node {} stopped".format(host))
+                else:
+                    self.logger.info("hiveserver2 on Node {} already stopped".format(host))
+
+
 
 
 
