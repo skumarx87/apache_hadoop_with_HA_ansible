@@ -1,5 +1,5 @@
-- name: Downloading Binaris
-  hosts: hiveNode 
+- name: Installing Tez 
+  hosts: hiveserver2Node:hivemetastoreNode
   any_errors_fatal: true
   vars_files:
     - vars/bigdata_build_versions.yml 

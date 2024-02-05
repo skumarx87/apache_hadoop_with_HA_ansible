@@ -242,11 +242,14 @@ class bigadm:
                 self.logger.info(cmd)
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 self.hive_process_pid_writting(host,self.hive_metastore_port,hm_pid_file,"hivemetastore")
+
+            hivems_ha_hosts ="thrift://"+",".join(str(item)+":"+str(self.hive_metastore_port) for item in hm_hosts)
+
             for host in hs2_hosts:
                 #cmd = ['ssh',host,'nohup',hive_cmd,'--service','metastore','&']
                 cmd = """ssh hadoop@{} "source ~/.bash_profile;nohup {} --service hiveserver2 \
-                --hiveconf hive.log.dir={} >{} 2>&1 &"
-                """.format(host,hive_cmd,hive_log_path,hs2_log_file)
+                --hiveconf hive.log.dir={} --hiveconf hive.metastore.uris={} >{} 2>&1 &"
+                """.format(host,hive_cmd,hive_log_path,hivems_ha_hosts,hs2_log_file)
                 self.logger.info("Starting hiveserver2 on node: {}".format(host))
                 self.logger.info(cmd)
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
