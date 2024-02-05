@@ -160,6 +160,7 @@ class bigadm:
     def hdfs_service(self,action):
         env_hadoop_home = os.environ.get('HADOOP_HOME')
         hadoop_daemon = "{}/sbin/hadoop-daemon.sh".format(env_hadoop_home)
+        #hdfs --daemon start namenode
 
         nm_hosts = self.parse_ansible_inventory('nameNode')
         dn_hosts = self.parse_ansible_inventory('dataNode')

@@ -15,7 +15,7 @@
    </property>
   <property>
       <name>dfs.data.dir</name>
-      <value>/usr/bigdata/data/name_dir</value>
+      <value>/usr/bigdata/data/data_dir</value>
    </property>
 </configuration>
 
