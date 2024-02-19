@@ -68,6 +68,11 @@ sparkmaster.example.com
 sworker1.example.com
 sworker2.example.com
 
+[journalNode]
+sparkmaster.example.com
+sworker1.example.com
+sworker2.example.com
+
 [zookeeperNode]
 sparkmaster.example.com
 sworker1.example.com
