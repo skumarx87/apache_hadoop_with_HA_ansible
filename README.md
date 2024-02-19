@@ -55,6 +55,12 @@ sworker2.example.com
 [hiveNode]
 sparkmaster.example.com
 
+[hiveserver2Node]
+sparkmaster.example.com
+
+[hivemetastoreNode]
+sparkmaster.example.com
+
 [sparkMaster]
 sparkmaster.example.com
 
@@ -109,7 +115,7 @@ ansible all -u root --ask-pass -a "yum -y install git-core net-tools sshpass wge
    SPARK_LOCAL_DIR: "/tmp/"
    SPARK_SECRET: "test123"
 * ./hadoop_install.sh
-*
+* source ~/.bash_profile
 * bigdata fresh_install
 ```
 
