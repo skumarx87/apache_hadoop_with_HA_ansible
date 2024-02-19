@@ -124,7 +124,7 @@ class bigadm:
             return None
 
     def get_pid_from_port_overssh(self,host,port):
-        cmd = ['ssh',host,'lsof','-t','-i:{}'.format(port),'-sTCP:LISTEN']
+        cmd = ['ssh',host,'/usr/sbin/lsof','-t','-i:{}'.format(port),'-sTCP:LISTEN']
         pid=self.run_command_over_ssh(cmd)
         if isinstance(pid, str) :
             return pid.strip()
@@ -143,7 +143,7 @@ class bigadm:
                 if is_pid_launched:
                     break
             '''
-            cmd = ['ssh',host,'lsof','-t','-i:{}'.format(port)]
+            cmd = ['ssh',host,'/usr/sbin/lsof','-t','-i:{}'.format(port)]
             out=self.run_command_over_ssh(cmd)
             if isinstance(out, str) :
                 is_pid_launched=self.check_process_of_pid_over_ssh(host,out.strip(),'java',PidFile=False)
