@@ -1,0 +1,4 @@
+
+- name: Copy workers file
+  template: src=ha.yaml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
+

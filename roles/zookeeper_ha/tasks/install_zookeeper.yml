@@ -1,0 +1,59 @@
+- name: Checking zookeeper already installed or not
+  stat:
+    path: "{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin"
+  register: zookeeper_installed_status
+
+- name: Display all variables/facts known for a host
+  debug:
+    msg: "{% if zookeeper_installed_status.stat.exists %} Zookeeper is already installed {% else %} Zookeeper not installed {% endif %}"
+
+- name: Check zookeeper archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ zookeeper_file }}"
+  register: zookeeper_download_file
+  when: not zookeeper_installed_status.stat.exists
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  register: dir_creation_status
+  when: not zookeeper_installed_status.stat.exists
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ bigdata_dir }}"
+     - "{{ bigdata_env_dir }}"
+     - "{{ bigdata_new_release_dir }}"
+
+- name: Transfer Zookeeper binaries
+  copy: src={{ tmp_dir }}/{{ zookeeper_file }} dest={{ tmp_dir_cache }}/{{ zookeeper_file }}
+  when: not zookeeper_installed_status.stat.exists
+
+
+- name: "Moving Files workspace"
+  command: mv {{ tmp_dir_cache }}/{{ zookeeper_file }} {{ tmp_dir }}/{{ zookeeper_file }}
+  when: not zookeeper_installed_status.stat.exists
+
+- name: Unzip Zookeeper
+  shell: "tar zxf {{ tmp_dir }}/{{ zookeeper_file }} -C {{ bigdata_new_release_dir }}"
+  when: not zookeeper_installed_status.stat.exists
+
+- name: "Creating zookeeper Env soft link"
+  file:
+   src: "{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin" 
+   dest: "{{ bigdata_env_dir }}/zookeeper"
+   state: link
+#  when: not zookeeper_installed_status.stat.exists
+
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/zookeeper/bin"
+

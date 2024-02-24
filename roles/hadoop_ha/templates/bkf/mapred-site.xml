@@ -1,0 +1,13 @@
+<configuration>
+  <property>
+	<name>mapreduce.framework.name</name>
+	<value>yarn-tez</value>
+  </property>
+
+   <property>
+	 <name>yarn.app.mapreduce.am.staging-dir</name>
+	<value>hdfs://@@NAMENODE_HOSTNAME@@:9000/tmp/mapred</value>
+  </property>
+
+</configuration>
+

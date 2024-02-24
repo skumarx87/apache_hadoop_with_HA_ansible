@@ -1,0 +1,10 @@
+tickTime=2000
+initLimit=10
+syncLimit=5
+dataDir={{ bigdata_dir_zookeeper }}/dataDir
+clientPort=2181
+admin.serverPort=9876
+{% set zookeeper_nodes_uri = [] %}
+{% for host in groups['zookeeperNode'] %}
+{{ "server.{count}={host}:2888:3888".format(count=loop.index,host=host) }}
+{% endfor %}

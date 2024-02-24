@@ -1,0 +1,22 @@
+---
+- name: "Creating directory: {{ bigdata_dir_zookeeper }}/dataDir"
+  ansible.builtin.file: 
+    path: '{{ bigdata_dir_zookeeper }}/dataDir' 
+    state: directory
+    mode: 0755
+
+- name: Creating zoo.cfg ha file 
+  template: src=zoo.cfg dest="{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin/conf/" mode=644
+
+- name: Creating log4j.properties file 
+  template: src=log4j.properties dest="{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin/conf/" mode=644
+
+- name: Creating zookeeper-env.sh file 
+  template: src=zookeeper-env.sh dest="{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin/conf/" mode=644
+- name: Template myid file in {{ bigdata_dir_zookeeper }}/dataDir 
+  ansible.builtin.template: 
+    src: myid.j2 
+    dest: "{{ bigdata_dir_zookeeper }}/dataDir/myid" 
+    mode: 0644
+  #notify:
+  #  - Restart ZooKeeper service

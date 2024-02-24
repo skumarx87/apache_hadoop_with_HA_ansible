@@ -1,0 +1,13 @@
+- name: creating hdfs workers file
+  blockinfile:
+   path: "{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/workers"
+   block: |
+    {% for host in groups['dataNode'] %} 
+    {{  host }}
+    {% endfor %}
+
+- name: creating core-site.xml file
+  template: src=core-site.yml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/core-site.xml" mode=644
+
+- name: creating hdfs-site.xml file
+  template: src=hdfs-site.yml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/hdfs-site.xml" mode=644
