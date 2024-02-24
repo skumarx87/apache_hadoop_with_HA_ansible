@@ -11,6 +11,7 @@ derby_file: "db-derby-{{ derby_version }}-bin.tar.gz"
 kafka_file: "kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
 zookeeper_file: "apache-zookeeper-{{ zookeeper_version }}-bin.tar.gz"
 impala_file: "apache-impala-{{ impala_version }}.tar.gz"
+cloudera_hue_file: "release-{{ cloudera_hue_version }}.tar.gz"
 
 hadoop_url: "{{ apache_hadoop_site }}/hadoop/core/hadoop-{{ hadoop_version }}/{{ hadoop_file }}"
 hive_url: "{{ apache_hive_site }}/hive/hive-{{ hive_version }}/{{ hive_file }}"
@@ -21,3 +22,4 @@ derby_url: "{{ apache_hadoop_site }}/db/derby/db-derby-{{ derby_version }}/{{ de
 kafka_url: "{{ apache_kafka_site }}/kafka/{{ kafka_version }}/{{ kafka_file }}"
 zookeeper_url: "{{ apache_zookeeper_site }}/zookeeper/zookeeper-{{ zookeeper_version }}/{{ zookeeper_file }}"
 impala_url: "{{ apache_impala_site }}/impala/{{ impala_version }}/{{ impala_file }}"
+cloudera_hue_url: "{{ cloudera_hue_site }}/{{ cloudera_hue_file }}"

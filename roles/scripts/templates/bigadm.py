@@ -8,37 +8,43 @@ import subprocess
 import re
 import time
 
+
 class bigadm:
     def __init__(self):
         self.logger = logging.getLogger("bigadm")
-        self.hive_metastore_port = 9083 
+        self.hive_metastore_port = 9083
         self.hiveserver2_port = 10000
         logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s - %(levelname)s - [%(name)s] - %(message)s',
                 datefmt='%Y-%m-%d %H:%M:%S')
 
         self.env_bigdata_root_name = 'BIGDATA_ROOT'
-        #self.parse_ansible_inventory()
+        # self.parse_ansible_inventory()
         if not self.env_bigdata_root_name in os.environ:
-            self.logger.error("BIGDATA_ROOT environment variable not defined or loaded")
+            self.logger.error(
+                "BIGDATA_ROOT environment variable not defined or loaded")
             sys.exit(-1)
-        self.env_bigdata_root_value = os.environ.get(self.env_bigdata_root_name)
+        self.env_bigdata_root_value = os.environ.get(
+            self.env_bigdata_root_name)
         logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s - %(levelname)s - [%(name)s] - %(message)s',
                 datefmt='%Y-%m-%d %H:%M:%S')
 
-
         # Configure logging
         self.allowed_service = [
-                'hdfs',
+                'namenode',
+                'datanode',
+                'journalnode',
                 'hive',
                 'zookeeper',
                 'kafka',
                 'spark'
                 ]
-    def run_command_over_ssh(self,cmd):
+
+    def run_command_over_ssh(self, cmd):
         try:
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+            process = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
             stdout, stderr = process.communicate(timeout=5)
             #self.logger.info(stdout.strip())
             #self.logger.info(stderr.strip())
@@ -51,13 +57,14 @@ class bigadm:
             self.logger.error("The subprocess timed out.")
             return None
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Command failed with return code {e.returncode}: {e.output}")
+            self.logger.error(
+                f"Command failed with return code {e.returncode}: {e.output}")
             return None
         except Exception as e:
             self.logger.error(f"An error occurred: {e}")
             return None
-            
-    def parse_ansible_inventory(self,host_group):
+
+    def parse_ansible_inventory(self, host_group):
         path = "/usr/bigdata/ansibleProjects/files/hosts"
         loader = DataLoader()
         inventory = InventoryManager(loader=loader, sources=path)
@@ -67,10 +74,9 @@ class bigadm:
         except:
             return None
 
-
-    def read_pid_from_file(self,file_path):
+    def read_pid_from_file(self, file_path):
         try:
-            with open(file_path,'r') as file:
+            with open(file_path, 'r') as file:
                 pid = int(file.read().strip())
                 return pid
         except:
@@ -85,61 +91,66 @@ class bigadm:
         else:
             return True
     '''
+
     def parse_arguments(self):
-        parser = argparse.ArgumentParser(description="adoop cluster managment script")
-        parser.add_argument('--start',help='for starting service')
-        parser.add_argument('--stop',help='for starting service')
-        parser.add_argument('--stopAll',help='for starting service')
-        parser.add_argument('--startAll',help='for starting service')
-        parser.add_argument('--statusAll',help='for starting service')
-        parser.add_argument('--status',help='for starting service')
+        parser = argparse.ArgumentParser(
+            description="adoop cluster managment script")
+        parser.add_argument('--start', help='for starting service')
+        parser.add_argument('--stop', help='for starting service')
+        parser.add_argument('--stopAll', help='for starting service')
+        parser.add_argument('--startAll', help='for starting service')
+        parser.add_argument('--statusAll', help='for starting service')
+        parser.add_argument('--status', help='for starting service')
         return parser.parse_args()
 
-    def check_string_pattern(self,string,keyword):
+    def check_string_pattern(self, string, keyword):
         if string is None:
             return False
         else:
-            match=re.search(keyword,string)
+            match = re.search(keyword, string)
             if match:
                 return True
             else:
                 return False
-    
-    def check_process_of_pid_over_ssh(self,host,pid_file,process_name,PidFile=True):
+
+    def check_process_of_pid_over_ssh(self, host, pid_file, process_name, PidFile=True):
         if PidFile:
-            cmd = ['ssh',host,' ','cat',pid_file]
-            pid=self.run_command_over_ssh(cmd)
+            cmd = ['ssh', host, ' ', 'cat', pid_file]
+            pid = self.run_command_over_ssh(cmd)
         else:
             pid = pid_file
 
         if pid is not None:
-            cmd = ['ssh',host,'ps','-p',pid]
-            res=self.run_command_over_ssh(cmd)
+            cmd = ['ssh', host, 'ps', '-p', pid]
+            res = self.run_command_over_ssh(cmd)
             if res is not None:
-                is_running = self.check_string_pattern(res,process_name)
+                is_running = self.check_string_pattern(res, process_name)
                 return is_running
             else:
                 return None
         else:
             return None
 
-    def get_pid_from_port_overssh(self,host,port):
-        cmd = ['ssh',host,'/usr/sbin/lsof','-t','-i:{}'.format(port),'-sTCP:LISTEN']
-        pid=self.run_command_over_ssh(cmd)
-        if isinstance(pid, str) :
+    def get_pid_from_port_overssh(self, host, port):
+        cmd = ['ssh', host, '/usr/sbin/lsof', '-t',
+            '-i:{}'.format(port), '-sTCP:LISTEN']
+        pid = self.run_command_over_ssh(cmd)
+        if isinstance(pid, str):
             return pid.strip()
         else:
             return None
 
-    def hive_process_pid_writting(self,host,port,pid_file,process_name):
+    def hive_process_pid_writting(self, host, port, pid_file, process_name):
         is_pid_launched = False
         start_time = time.time()
         while time.time() - start_time < 20:
             time.sleep(1)
-            self.logger.info("waiting for {} Process to launch ({})s".format(process_name,int(time.time() - start_time)))
-            pid=self.get_pid_from_port_overssh(host,port)
+            self.logger.info("waiting for {} Process to launch ({})s".format(
+                process_name, int(time.time() - start_time)))
+            pid = self.get_pid_from_port_overssh(host, port)
             if pid is not None:
-                is_pid_launched=self.check_process_of_pid_over_ssh(host,pid,'java',PidFile=False)
+                is_pid_launched = self.check_process_of_pid_over_ssh(
+                    host, pid, 'java', PidFile=False)
                 if is_pid_launched:
                     break
             '''
@@ -151,74 +162,115 @@ class bigadm:
                     break
             '''
         if is_pid_launched:
-            cmd = ['ssh',host,'echo',pid,'>',pid_file]
+            cmd = ['ssh', host, 'echo', pid, '>', pid_file]
             self.run_command_over_ssh(cmd)
             self.logger.info("{} server running...".format(process_name))
         else:
-            self.logger.warning("{} is not started or taking long time to start".format(process_name))
+            self.logger.warning(
+                "{} is not started or taking long time to start".format(process_name))
 
-    def hdfs_service(self,action):
+    def hdfs_service(self, action, service=None):
         env_hadoop_home = os.environ.get('HADOOP_HOME')
         hadoop_daemon = "{}/sbin/hadoop-daemon.sh".format(env_hadoop_home)
-        #hdfs --daemon start namenode
+        # hdfs --daemon start namenode
 
         nm_hosts = self.parse_ansible_inventory('nameNode')
         dn_hosts = self.parse_ansible_inventory('dataNode')
         jn_hosts = self.parse_ansible_inventory('journalNode')
         if action == 'status':
-            nm_pid_file = "{}/pids/hadoop-hadoop-namenode.pid".format(self.env_bigdata_root_value)
-            dn_pid_file = "{}/pids/hadoop-hadoop-datanode.pid".format(self.env_bigdata_root_value)
-            jn_pid_file = "{}/pids/hadoop-hadoop-journalnode.pid".format(self.env_bigdata_root_value)
+            nm_pid_file = "{}/pids/hadoop-hadoop-namenode.pid".format(
+                self.env_bigdata_root_value)
+            dn_pid_file = "{}/pids/hadoop-hadoop-datanode.pid".format(
+                self.env_bigdata_root_value)
+            jn_pid_file = "{}/pids/hadoop-hadoop-journalnode.pid".format(
+                self.env_bigdata_root_value)
+            zkfc_pid_file = "{}/pids/hadoop-hadoop-zkfc.pid".format(
+                self.env_bigdata_root_value)
             for host in jn_hosts:
-                is_running = self.check_process_of_pid_over_ssh(host,jn_pid_file,'java')
+                is_running = self.check_process_of_pid_over_ssh(
+                    host, jn_pid_file, 'java')
                 if is_running:
                     self.logger.info("Journal Node {} Running...".format(host))
                 else:
-                    self.logger.info("Journal Node {} is not Running...".format(host))
+                    self.logger.info(
+                        "Journal Node {} is not Running...".format(host))
 
             for host in dn_hosts:
-                is_running=self.check_process_of_pid_over_ssh(host,dn_pid_file,'java')
+                is_running = self.check_process_of_pid_over_ssh(
+                    host, dn_pid_file, 'java')
                 if is_running:
                     self.logger.info("Data Node {} Running...".format(host))
                 else:
-                    self.logger.info("Data Node {} is not Running...".format(host))
+                    self.logger.info(
+                        "Data Node {} is not Running...".format(host))
             for host in nm_hosts:
-                is_running=self.check_process_of_pid_over_ssh(host,nm_pid_file,'java')
+                is_running = self.check_process_of_pid_over_ssh(
+                    host, nm_pid_file, 'java')
                 if is_running:
                     self.logger.info("Name Node {} Running...".format(host))
                 else:
-                    self.logger.info("Name Node {} is not Running...".format(host))
+                    self.logger.info(
+                        "Name Node {} is not Running...".format(host))
+                is_running = self.check_process_of_pid_over_ssh(
+                    host, zkfc_pid_file, 'java')
+                if is_running:
+                    self.logger.info("ZKFailoverController {} Running...".format(host))
+                else:
+                    self.logger.info(
+                        "ZKFailoverController {} is not Running...".format(host))
+
         elif action == 'start':
-            for host in nm_hosts:
-                cmd = ['ssh',host,hadoop_daemon,'start','namenode']
-                self.logger.info("Starting Namenode on node: {}".format(host))
-                out=self.run_command_over_ssh(cmd)
-            for host in dn_hosts:
-                cmd = ['ssh',host,hadoop_daemon,'start','datanode']
-                self.logger.info("Starting datanode on node: {}".format(host))
-                out=self.run_command_over_ssh(cmd)
-            for host in jn_hosts:
-                cmd = ['ssh',host,hadoop_daemon,'start','journalnode']
-                self.logger.info("Starting journalnode on node: {}".format(host))
-                out=self.run_command_over_ssh(cmd)
+            if service == 'namenode':
+                for host in nm_hosts:
+                    cmd = ['ssh', host, hadoop_daemon, 'start', 'namenode']
+                    self.logger.info("Starting Namenode on node: {}".format(host))
+                    out = self.run_command_over_ssh(cmd)
+                    self.logger.info("Starting ZKFailoverController on node: {}".format(host))
+                    cmd = ['ssh', host, hadoop_daemon, 'start', 'zkfc']
+                    out = self.run_command_over_ssh(cmd)
+            elif service == 'datanode':
+                for host in dn_hosts:
+                    cmd = ['ssh', host, hadoop_daemon, 'start', 'datanode']
+                    self.logger.info(
+                        "Starting datanode on node: {}".format(host))
+                    out = self.run_command_over_ssh(cmd)
+            elif service == 'journalnode':
+                for host in jn_hosts:
+                    cmd = ['ssh', host, hadoop_daemon,
+                        'start', 'journalnode']
+                    self.logger.info(
+                        "Starting journalnode on node: {}".format(host))
+                    out = self.run_command_over_ssh(cmd)
+            else:
+                self.logger.error("Invalid Servie: {} service...".format(service))
             self.hdfs_service('status')
         elif action == 'stop':
-            for host in nm_hosts:
-                cmd = ['ssh',host,hadoop_daemon,'stop','namenode']
-                self.logger.info("Stopping Namenode on node: {}".format(host))
-                out=self.run_command_over_ssh(cmd)
-            for host in dn_hosts:
-                cmd = ['ssh',host,hadoop_daemon,'stop','datanode']
-                self.logger.info("Stopping datanode on node: {}".format(host))
-                out=self.run_command_over_ssh(cmd)
-            for host in jn_hosts:
-                cmd = ['ssh',host,hadoop_daemon,'stop','journalnode']
-                self.logger.info("Stopping journalnode on node: {}".format(host))
-                out=self.run_command_over_ssh(cmd)
-            self.hdfs_service('status')
-                
-                    
+            if service == 'namenode':
+                for host in nm_hosts:
+                    cmd = ['ssh',host,hadoop_daemon,'stop','namenode']
+                    self.logger.info("Stopping Namenode on node: {}".format(host))
+                    out=self.run_command_over_ssh(cmd)
+                    cmd = ['ssh',host,hadoop_daemon,'stop','zkfc']
+                    self.logger.info("Stopping ZKFailoverController on node: {}".format(host))
+                    out=self.run_command_over_ssh(cmd)
+            elif service == 'datanode':
+                for host in dn_hosts:
+                    cmd = ['ssh',host,hadoop_daemon,'stop','datanode']
+                    self.logger.info("Stopping datanode on node: {}".format(host))
+                    out=self.run_command_over_ssh(cmd)
+            elif service == 'journalnode':
+                for host in jn_hosts:
+                    cmd = ['ssh',host,hadoop_daemon,'stop','journalnode']
+                    self.logger.info("Stopping journalnode on node: {}".format(host))
+                    out=self.run_command_over_ssh(cmd)
+            else:
+                self.logger.error("Invalid Servie: {} selected...".format(service))
+
+
+
     def zookeeper_service(self,action):
+        env_zk_home = os.environ.get('ZOOKEEPER_HOME')
+        zk_bin_exe = "{env_zk_home}/bin/zkServer.sh".format(env_zk_home=env_zk_home)
         if action == 'status':
             zk_pid_file = "{}/Envs/zookeeper/dataDir/zookeeper_server.pid".format(self.env_bigdata_root_value)
             zk_hosts = self.parse_ansible_inventory('zookeeperNode')
@@ -228,6 +280,23 @@ class bigadm:
                     self.logger.info("zookeeper Node {} Running...".format(host))
                 else:
                     self.logger.info("zookeeper Node {} is not Running...".format(host))
+        if action == 'start':
+            zk_hosts = self.parse_ansible_inventory('zookeeperNode')
+            for host in zk_hosts:
+                self.logger.info("Starting zookeeper on Node: {}".format(host))
+                cmd = ['ssh',host,zk_bin_exe,'start'] 
+                out=self.run_command_over_ssh(cmd)
+            self.zookeeper_service('status')
+
+        if action == 'stop':
+            zk_hosts = self.parse_ansible_inventory('zookeeperNode')
+            for host in zk_hosts:
+                self.logger.info("Stopping zookeeper on Node: {}".format(host))
+                cmd = ['ssh',host,zk_bin_exe,'stop']
+                out=self.run_command_over_ssh(cmd)
+            self.zookeeper_service('status')
+                #self.logger.info(out.strip())
+
 
     def hive_service(self,action):
         env_hive_home = os.environ.get('HIVE_HOME')
@@ -274,7 +343,7 @@ class bigadm:
                 self.logger.info(cmd)
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 self.hive_process_pid_writting(host,self.hiveserver2_port,hs2_pid_file,"hiveserver2")
-                
+
         elif action == 'stop':
             for host in hm_hosts:
                 pid=self.get_pid_from_port_overssh(host,self.hive_metastore_port)
@@ -364,7 +433,6 @@ class bigadm:
                 out=self.run_command_over_ssh(cmd)
 
 
-
     def main(self,args):
         if args.start:
             if args.start.lower() == 'all':
@@ -383,36 +451,24 @@ class bigadm:
             else:
                 self.status_service(args)
 
-    '''
-    def start_service(self,args,all_service=False):
-        self.logger.info('Starting service')
-        if all_service:
-            self.logger.info("Staring all services")
-        else:
-            if args.start.lower() in self.allowed_service:
-                if args.start.lower() == 'hdfs':
-                    self.logger.info("Staring hdfs services")
-                    self.hdfs_service('start')
-                elif args.start.lower() == 'hive':
-                    self.logger.info("Staring hive services")
-                    self.hive_service('start')
-                elif args.start.lower() == 'spark':
-                    self.spark_service('start')
-            else:
-                self.logger.error("{} service doesn't exist".format(args.start))
-    '''
     def start_service(self,args,all_service=False):
         if all_service:
-            self.logger.info("Checking all service start")
-            self.hdfs_service('start')
+            self.logger.info("Starting all service")
             self.zookeeper_service('start')
+            self.hdfs_service('start','journalnode')
+            self.hdfs_service('start','namenode')
+            self.hdfs_service('start','datanode')
             self.hive_service('start')
             self.spark_service('start')
         else:
             if args.start.lower() in self.allowed_service:
                 self.logger.info("Checking {} service start".format(args.start))
-                if args.start.lower() == 'hdfs':
-                    self.hdfs_service('start')
+                if args.start.lower() == 'namenode':
+                    self.hdfs_service('start','namenode')
+                if args.start.lower() == 'datanode':
+                    self.hdfs_service('start','datanode')
+                if args.start.lower() == 'journalnode':
+                    self.hdfs_service('start','journalnode')
                 elif args.start.lower() == 'zookeeper':
                     self.zookeeper_service('start')
                 elif args.start.lower() == 'hive':
@@ -426,16 +482,22 @@ class bigadm:
 
     def stop_service(self,args,all_service=False):
         if all_service:
-            self.logger.info("Checking all service stop")
-            self.hdfs_service('stop')
+            self.logger.info("Stopping all service")
+            self.hdfs_service('stop','datanode')
+            self.hdfs_service('stop','namenode')
+            self.hdfs_service('stop','journalnode')
             self.zookeeper_service('stop')
             self.hive_service('stop')
             self.spark_service('stop')
         else:
             if args.stop.lower() in self.allowed_service:
                 self.logger.info("Checking {} service stop".format(args.stop))
-                if args.stop.lower() == 'hdfs':
-                    self.hdfs_service('stop')
+                if args.stop.lower() == 'namenode':
+                    self.hdfs_service('stop','namenode')
+                if args.stop.lower() == 'datanode':
+                    self.hdfs_service('stop','datanode')
+                if args.stop.lower() == 'journalnode':
+                    self.hdfs_service('stop','journalnode')
                 elif args.stop.lower() == 'zookeeper':
                     self.zookeeper_service('stop')
                 elif args.stop.lower() == 'hive':
@@ -445,7 +507,7 @@ class bigadm:
 
             else:
                 self.logger.error("{} service doesn't exist".format(args.stop))
-    
+
     def status_service(self,args,all_service=False):
         if all_service:
             self.logger.info("Checking all service status")
@@ -464,14 +526,13 @@ class bigadm:
                     self.hive_service('status')
                 elif args.status.lower() == 'spark':
                     self.spark_service('status')
-                
+
             else:
                 self.logger.error("{} service doesn't exist".format(args.status))
-    
+
 
 
 if __name__ == '__main__':
     obj = bigadm()
     args = obj.parse_arguments()
     obj.main(args)
-

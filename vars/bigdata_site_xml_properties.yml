@@ -1,8 +1,9 @@
 BIGDATA_DIR: "/usr/bigdata"
-NAMENODE_HOSTNAME: "sparkmaster.example.com"
+NAMENODE_HOSTNAME: "dev-kmaster1.tanu.com"
+NAMNODE_HA: "hacluster"
 DFS_REPLICATION_LEVEL: "3"
-FS_DEFAULT_NAME: "hdfs://sparkmaster.example.com:9000"
-
+FS_DEFAULT_NAME: "hdfs://dev-kmaster1.tanu.com:9000"
+HADOOP_USER: "hadoop"
 #Spark
 
 SPARK_LOCAL_DIR: "/tmp/" 
