@@ -43,7 +43,7 @@
 
 - name: Updating Bash profile 
   lineinfile:
-    path: "{{ user_name }}/.bash_profile"
+    path: "/home/{{ HADOOP_USER }}/.bash_profile"
     line: "source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh"
     backup: yes
 

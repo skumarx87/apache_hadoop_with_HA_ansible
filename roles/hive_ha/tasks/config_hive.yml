@@ -1,0 +1,14 @@
+---
+
+- name: Copy Hive hive-site.xml
+  template: src=hive-site.xml dest="{{ bigdata_new_release_dir }}/apache-hive-{{ hive_version }}-bin/conf/" mode=644
+
+- name: Copy mysql-connector-java-8.0.21.jar 
+  copy: src=mysql-connector-java-8.0.21.jar dest="{{ bigdata_new_release_dir }}/apache-hive-{{ hive_version }}-bin/lib/" mode=644
+
+- name: Hive init schema task 
+  run_once: true
+  ansible.builtin.shell: |
+    source ~/.bash_profile
+    /usr/bigdata/Envs/hive/bin/schematool -dbType mysql -initSchema
+  when: not is_already_installed

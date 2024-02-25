@@ -1,0 +1,4 @@
+---
+
+- name: Copy Hive hive-site.xml
+  template: src=hive-site.xml dest="{{ bigdata_new_release_dir }}/apache-hive-{{ hive_version }}-bin/conf/" mode=644

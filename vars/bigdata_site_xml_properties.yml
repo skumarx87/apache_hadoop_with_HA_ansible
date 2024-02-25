@@ -4,6 +4,12 @@ NAMNODE_HA: "hacluster"
 DFS_REPLICATION_LEVEL: "3"
 FS_DEFAULT_NAME: "hdfs://dev-kmaster1.tanu.com:9000"
 HADOOP_USER: "hadoop"
+## HIVE
+
+Hive_ConnectionURL: "jdbc:mysql://dev-kmaster1.tanu.com/hive?createDatabaseIfNotExist=true"
+Hive_ConnectionUserName: "hive"
+Hive_ConnectionPassword: "hive"
+Hive_ConnectionDriverName: "com.mysql.jdbc.Driver"
 #Spark
 
 SPARK_LOCAL_DIR: "/tmp/" 

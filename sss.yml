@@ -1,0 +1,22 @@
+---
+- name: Downloading Binaris
+  hosts: hivemetastoreNode
+  any_errors_fatal: true
+  vars_files:
+    - vars/bigdata_build_versions.yml
+    - vars/main.yml
+    - vars/bigdata_install_property.yml
+    - vars/bigdata_site_xml_properties.yml
+  vars:
+    install_hadoop: false
+    config_hadoop: false
+    install_hive: true
+    config_hive: true
+  roles:
+    - role: hadoop_ha
+    - role: hive_ha
+  post_tasks:
+    - name: post task name
+      debug:
+        msg: this is post taks
+

@@ -1,5 +1,5 @@
 - name: Downloading Binaris
-  hosts: hiveserver2Node:hivemetastoreNode 
+  hosts: hivemetastoreNode
   any_errors_fatal: true
   vars_files:
     - vars/bigdata_build_versions.yml 
@@ -10,9 +10,17 @@
     install_hadoop: false
     config_hadoop: false
     install_hive: true 
+    install_tez: true
     config_hive: true
+    install_scripts: true
+    is_already_installed: false
+
 #  become: true
   
   roles:
-    - role: hadoop 
-    - role: hive
+    - role: hadoop_ha
+    - role: hive_ha
+    - role: tez
+    - role: scripts
+        
+

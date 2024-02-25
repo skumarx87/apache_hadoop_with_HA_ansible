@@ -32,6 +32,7 @@ class bigadm:
 
         # Configure logging
         self.allowed_service = [
+                'hdfs',
                 'namenode',
                 'datanode',
                 'journalnode',
@@ -143,7 +144,7 @@ class bigadm:
     def hive_process_pid_writting(self, host, port, pid_file, process_name):
         is_pid_launched = False
         start_time = time.time()
-        while time.time() - start_time < 20:
+        while time.time() - start_time < 40:
             time.sleep(1)
             self.logger.info("waiting for {} Process to launch ({})s".format(
                 process_name, int(time.time() - start_time)))
@@ -463,6 +464,10 @@ class bigadm:
         else:
             if args.start.lower() in self.allowed_service:
                 self.logger.info("Checking {} service start".format(args.start))
+                if args.start.lower() == 'hdfs':
+                    self.hdfs_service('start','journalnode')
+                    self.hdfs_service('start','namenode')
+                    self.hdfs_service('start','datanode')
                 if args.start.lower() == 'namenode':
                     self.hdfs_service('start','namenode')
                 if args.start.lower() == 'datanode':
@@ -492,6 +497,10 @@ class bigadm:
         else:
             if args.stop.lower() in self.allowed_service:
                 self.logger.info("Checking {} service stop".format(args.stop))
+                if args.stop.lower() == 'hdfs':
+                    self.hdfs_service('stop','datanode')
+                    self.hdfs_service('stop','namenode')
+                    self.hdfs_service('stop','journalnode')
                 if args.stop.lower() == 'namenode':
                     self.hdfs_service('stop','namenode')
                 if args.stop.lower() == 'datanode':

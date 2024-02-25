@@ -1,0 +1,109 @@
+{%- set hm_nodes_uri = [] %}
+{%- for host in groups['hivemetastoreNode'] %}
+{{ hm_nodes_uri.append("thrift://{host}:9083".format(host=host)) }}
+{%- endfor %}
+
+<configuration>
+
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+	<value>{{ Hive_ConnectionURL }}</value>
+    </property>
+    <property>
+	<name>javax.jdo.option.ConnectionUserName</name> 
+	<value>{{ Hive_ConnectionUserName }}</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>{{ Hive_ConnectionPassword }}</value>
+    </property>
+    <property>
+	<name>javax.jdo.option.ConnectionDriverName</name> 
+	<value>{{ Hive_ConnectionDriverName }}</value> 
+	<description>MySQL JDBC driver class</description> 
+    </property>
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>hdfs://{{ NAMNODE_HA }}/data/hive/warehouse</value>
+    </property>
+
+    <property>
+        <name>hive.execution.engine</name>
+        <value>tez</value>
+    </property>
+
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>{{ hm_nodes_uri|join(',') }}</value>
+    </property>
+
+    <property>
+        <name>hive.server2.thrift.bind.host</name>
+        <value>{{ inventory_hostname }}</value>
+    </property>
+
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+    </property>
+
+    <property>
+        <name>hive.user.install.directory</name>
+        <value>hdfs://{{ NAMNODE_HA }}/data/hive/job_jars</value>
+    </property>
+
+    <property>
+        <name>hive.server2.tez.default.queues</name>
+        <value>default</value>
+    </property>
+
+    <property>
+        <name>hive.server2.tez.initialize.default.sessions</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hive.server2.tez.sessions.per.default.queue</name>
+        <value>1</value>
+    </property>
+
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>tez.local.mode</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>tez.runtime.optimize.local.fetch</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.exec.scratchdir</name>
+        <value>file:///tmp/hive</value>
+    </property>
+
+    <property>
+        <name>hive.exec.max.dynamic.partitions</name>
+        <value>10000</value>
+    </property>
+
+    <property>
+        <name>hive.exec.max.dynamic.partitions.pernode</name>
+        <value>2000</value>
+    </property>
+
+    <property>
+        <name>hive.stats.column.autogather</name>
+        <value>false</value>
+    </property>
+
+    <property>
+       <name>hive.metastore.event.db.notification.api.auth</name>
+       <value>false</value>
+    </property>
+</configuration>

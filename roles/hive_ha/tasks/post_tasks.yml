@@ -1,0 +1,3 @@
+- name: Post Task Init schema
+  debug:
+  msg: "This is a pos task"

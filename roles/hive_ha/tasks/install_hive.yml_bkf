@@ -1,0 +1,59 @@
+- name: Checking hive already installed or not
+  stat:
+    path: "{{ bigdata_new_release_dir }}/apache-hive-{{ hive_version }}-bin"
+  register: hive_installed_status
+
+- name: Display all variables/facts known for a host
+  debug:
+    msg: "{% if hive_installed_status.stat.exists %} Hive is already installed {% else %} Hive not installed {% endif %}"
+
+- name: Check hive archive file exist
+  stat:
+    path: "{{ tmp_dir }}/{{ hive_file }}"
+  register: hive_download_file
+  when: not hive_installed_status.stat.exists
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  register: dir_creation_status
+  when: not hive_installed_status.stat.exists
+  with_items:
+     - "{{ tmp_dir }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ tmp_dir_cache }}"
+     - "{{ bigdata_dir }}"
+     - "{{ bigdata_env_dir }}"
+     - "{{ bigdata_new_release_dir }}"
+
+- name: Transfer Hive binaries
+  copy: src={{ tmp_dir }}/{{ hive_file }} dest={{ tmp_dir_cache }}/{{ hive_file }}
+  when: not hive_installed_status.stat.exists
+
+
+- name: "Moving Files workspace"
+  command: mv {{ tmp_dir_cache }}/{{ hive_file }} {{ tmp_dir }}/{{ hive_file }}
+  when: not hive_installed_status.stat.exists
+
+- name: Unzip Hive
+  shell: "tar zxf {{ tmp_dir }}/{{ hive_file }} -C {{ bigdata_new_release_dir }}"
+  when: not hive_installed_status.stat.exists
+
+- name: "Creating hive Env soft link"
+  file:
+   src: "{{ bigdata_new_release_dir }}/apache-hive-{{ hive_version }}-bin" 
+   dest: "{{ bigdata_env_dir }}/hive"
+   state: link
+#  when: not hive_installed_status.stat.exists
+
+- name: Setting-up Executable permissions to bin/sbin folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    recurse: yes
+  register: dir_creation_status
+  with_items:
+     - "{{ bigdata_env_dir }}/hive/bin"
+
