@@ -1,6 +1,6 @@
 ---
-#- include_tasks: install_hadoop.yml
-#  when: install_hadoop
+- include_tasks: install_hadoop.yml
+  when: install_hadoop
 - include_tasks: config_hadoop.yml
   when: config_hadoop
 

@@ -17,6 +17,9 @@
 - name: Copy bigadm.sh 
   template: src=bigadm.sh dest="{{ bigdata_dir_scripts }}/bigadm.sh" mode=644
 
+- name: Copy bigadm.py
+  template: src=bigadm.py dest="{{ bigdata_dir_scripts }}/bigadm.py" mode=644
+
 - name: Copy bigdata-user-profile.sh 
   template: src=bigdata-user-profile.sh dest="{{ bigdata_dir_scripts }}/bigdata-user-profile.sh" mode=644
 

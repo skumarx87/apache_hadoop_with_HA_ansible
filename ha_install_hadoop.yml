@@ -9,6 +9,7 @@
   vars:
     install_hadoop: true 
     config_hadoop: true 
+    is_hadoop_already_installed: false
 #  become: true
   
   roles:

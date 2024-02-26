@@ -11,3 +11,48 @@
 
 - name: creating hdfs-site.xml file
   template: src=hdfs-site.yml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/hdfs-site.xml" mode=644
+
+- name: Copy Hadoop mapred-site.xml
+  template: src=mapred-site.xml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
+
+- name: Copy Hadoop hadoop-env.sh
+  template: src=hadoop-env.sh dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
+
+- name: Starting zookeeper
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zookeeper 
+  async: 45
+  poll: 1
+  run_once: true
+  when:
+    - not is_hadoop_already_installed
+    - inventory_hostname in groups["nameNode"]
+
+- name: Starting journalnode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start journalnode
+  async: 45
+  poll: 1 
+  run_once: true
+  when:
+    - not is_hadoop_already_installed
+    - inventory_hostname in groups["nameNode"] 
+
+- name: hadoop namenode zkfc format 
+  run_once: true
+  async: 45
+  poll: 1 
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    hdfs zkfc -formatZK -force
+  when:
+    - not is_hadoop_already_installed
+    - inventory_hostname in groups["nameNode"] 
+
+- name: Starting hdfs services
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start hdfs
+  async: 45
+  poll: 1
+  run_once: true
+  when:
+    - not is_hadoop_already_installed
+    - inventory_hostname in groups["nameNode"]
+

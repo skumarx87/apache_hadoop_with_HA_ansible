@@ -3,6 +3,11 @@
     path: "{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}"
   register: hadoop_installed_status
 
+- name: Setting namenode zkfc format boolen value
+  ansible.builtin.set_fact:
+    is_hadoop_already_installed: true
+  when: hadoop_installed_status.stat.exists
+
 - name: Checking Java Installed or not
   command: "{{ java_home }}/bin/java -version"
   register: java_result

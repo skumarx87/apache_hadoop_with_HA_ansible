@@ -1,6 +1,8 @@
 export BIGDATA_ROOT={{ bigdata_dir }}
 export BIGDATA_FILE_SYSTEM=hdfs
 
+export JAVA_HOME={{ java_home }}
+
 export HADOOP_HOME=$BIGDATA_ROOT/Envs/hadoop
 export HADOOP_MAPRED_HOME=$HADOOP_HOME
 export HADOOP_COMMON_HOME=$HADOOP_HOME
