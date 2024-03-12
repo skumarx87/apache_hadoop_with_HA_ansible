@@ -1,0 +1,13 @@
+[Unit]
+Description=Description for sample script goes here
+After=namenode.service
+
+[Service]
+User=hadoop
+Type=forking
+ExecStart=/bin/bash -c "source /home/hadoop/.bash_profile && /usr/bigdata/Envs/scripts/bigadm.py --start zkfc --type=service"
+ExecStop=/bin/bash -c "source /home/hadoop/.bash_profile && /usr/bigdata/Envs/scripts/bigadm.py --stop zkfc --type=service"
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target

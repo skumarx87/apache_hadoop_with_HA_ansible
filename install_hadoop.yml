@@ -1,5 +1,5 @@
 - name: Downloading Binaris
-  hosts: nameNode:dataNode 
+  hosts: nameNode:dataNode:journalNode
   any_errors_fatal: true
   vars_files:
     - vars/bigdata_build_versions.yml 

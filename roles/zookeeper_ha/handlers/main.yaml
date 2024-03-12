@@ -1,0 +1,13 @@
+---
+- name: starting_zookeeper
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zookeeper
+  run_once: true
+  when:
+    - inventory_hostname in groups["zookeeperNode"]
+
+
+- name: enable_zookeeper_service
+  become: true
+  become_user: root
+  command: systemctl enable zookeeper.service
+  when: inventory_hostname in groups['zookeeperNode']

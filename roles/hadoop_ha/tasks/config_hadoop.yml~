@@ -1,6 +1,4 @@
 - name: creating hdfs workers file
-  become: yes
-  become_user: hadoop
   blockinfile:
    path: "{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/workers"
    block: |
@@ -9,23 +7,15 @@
     {% endfor %}
 
 - name: creating core-site.xml file
-  become: yes
-  become_user: hadoop
   template: src=core-site.yml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/core-site.xml" mode=644
 
 - name: creating hdfs-site.xml file
-  become: yes
-  become_user: hadoop
   template: src=hdfs-site.yml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/hdfs-site.xml" mode=644
 
 - name: Copy Hadoop mapred-site.xml
-  become: yes
-  become_user: hadoop
   template: src=mapred-site.xml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
 
 - name: Copy Hadoop hadoop-env.sh
-  become: yes
-  become_user: hadoop
   template: src=hadoop-env.sh dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
 
 - name: stopping zookeeper
@@ -39,35 +29,7 @@
   #changed_when: false
   notify: starting_zookeeper
   when: not is_hadoop_already_installed
- 
 
-- name: copying journalnode.service
-  become: true
-  become_user: root
-  template: src=journalnode.service dest="/etc/systemd/system/" mode=644
-  notify: enable_journalnode_service
-  when: inventory_hostname in groups['journalNode']
-
-- name: copying namenode.service
-  become: true
-  become_user: root
-  template: src=namenode.service dest="/etc/systemd/system/" mode=644
-  notify: enable_namenode_service
-  when: inventory_hostname in groups['nameNode']
-
-- name: copying zkfc.service
-  become: true
-  become_user: root
-  template: src=zkfc.service dest="/etc/systemd/system/" mode=644
-  notify: enable_zkfc_service
-  when: inventory_hostname in groups['nameNode']
-
-- name: copying datanode.service 
-  become: true
-  become_user: root
-  template: src=datanode.service dest="/etc/systemd/system/" mode=644
-  notify: enable_datanode_service
-  when: inventory_hostname in groups['dataNode']
 #- name: stopping zkfc
 #  debug: msg='' 
 #  changed_when: false 
@@ -83,29 +45,26 @@
 #    - not is_hadoop_already_installed
 #    - inventory_hostname in groups["nameNode"]
 
-#- name: Starting journalnode
-#  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start journalnode
-#  async: 90
-#  poll: 1 
-#  run_once: true
-#  when:
-#    - not is_hadoop_already_installed
-#    - inventory_hostname in groups["nameNode"] 
+- name: Starting journalnode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start journalnode
+  async: 90
+  poll: 1 
+  run_once: true
+  when:
+    - not is_hadoop_already_installed
+    - inventory_hostname in groups["nameNode"] 
 
 
 - name: stopping zkfc and format
-  #debug: msg=''
+  debug: msg=''
   #changed_when: false
-  command: /bin/true
   notify:
     - starting_zookeeper 
-    - stopping_zkfc
     - zkfc_format
-    - starting_journalnode
-    - starting_namenode
+    - stopping_zkfc
+    - zkfc_format 
     - starting_zkfc
-    - starting_datanode
-  when: not is_hadoop_already_installed
+  when: is_hadoop_already_installed
 
 #- name: hadoop namenode zkfc format 
 #  run_once: true
@@ -128,12 +87,12 @@
 #    - not is_hadoop_already_installed
 #    - inventory_hostname in groups["nameNode"]
 
-#- name: Starting hdfs services
-#  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start hdfs
-#  async: 90
-#  poll: 1
-#  run_once: true
-#  when:
-#    - not is_hadoop_already_installed
-#    - inventory_hostname in groups["nameNode"]
+- name: Starting hdfs services
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start hdfs
+  async: 90
+  poll: 1
+  run_once: true
+  when:
+    - not is_hadoop_already_installed
+    - inventory_hostname in groups["nameNode"]
 

@@ -1,0 +1,111 @@
+---
+- name: stopping_namenode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop namenode
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+
+
+- name: stopping_zkfc
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop zkfc
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zkfc 
+
+- name: stopping_datanode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop datanode
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+  #
+
+- name: stopping_journalnode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop journalnode
+  async: 90
+  poll: 1
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+
+- name: stopping_zookeeper
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #script: ./usr/bigdata/Envs/scripts/bigadm.py --start zookeeper
+  #
+
+- name: starting_zookeeper
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zookeeper
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+
+- name: zkfc_format
+  run_once: true
+  async: 90
+  poll: 1
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    hdfs zkfc -formatZK -force
+  when:
+    - inventory_hostname in groups["nameNode"]
+
+- name: starting_journalnode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start journalnode
+  async: 90
+  poll: 1
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+
+- name: starting_namenode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start namenode
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+
+- name: starting_zkfc
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zkfc
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #script: ./usr/bigdata/Envs/scripts/bigadm.py --start zkfc 
+
+- name: starting_datanode
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start datanode
+  run_once: true
+  when:
+    - inventory_hostname in groups["nameNode"]
+  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+
+- name: enable_journalnode_service 
+  become: true
+  become_user: root
+  command: systemctl enable journalnode.service
+  when: inventory_hostname in groups['journalNode']
+
+- name: enable_namenode_service
+  become: true
+  become_user: root
+  command: systemctl enable namenode.service
+  when: inventory_hostname in groups['nameNode']
+
+- name: enable_zkfc_service
+  become: true
+  become_user: root
+  command: systemctl enable zkfc.service
+  when: inventory_hostname in groups['nameNode']
+
+- name: enable_datanode_service
+  become: true
+  become_user: root
+  command: systemctl enable datanode.service
+  when: inventory_hostname in groups['dataNode']
+
+

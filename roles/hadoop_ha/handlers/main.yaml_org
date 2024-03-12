@@ -1,4 +1,0 @@
----
-- name: starting journalnode 
-  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;python roles/scripts/templates/bigadm.py --start journalnode
-

@@ -38,19 +38,27 @@
      - "{{ bigdata_new_release_dir }}"
 
 - name: Transfer Hadoop binaries
+  become: yes
+  become_user: hadoop
   copy: src={{ tmp_dir }}/{{ hadoop_file }} dest={{ tmp_dir_cache }}/{{ hadoop_file }}
   when: not hadoop_installed_status.stat.exists
 
 
 - name: "Moving Files workspace"
+  become: yes
+  become_user: hadoop
   command: mv {{ tmp_dir_cache }}/{{ hadoop_file }} {{ tmp_dir }}/{{ hadoop_file }}
   when: not hadoop_installed_status.stat.exists
 
 - name: Unzip Hadoop
+  become: yes
+  become_user: hadoop
   shell: "tar zxf {{ tmp_dir }}/{{ hadoop_file }} -C {{ bigdata_new_release_dir }}"
   when: not hadoop_installed_status.stat.exists
 
 - name: "Creating hadoop Env soft link"
+  become: yes
+  become_user: hadoop
   file:
    src: "{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}"
    dest: "{{ bigdata_env_dir }}/hadoop"
@@ -58,6 +66,8 @@
 #  when: not hadoop_installed_status.stat.exists
 
 - name: Setting-up Executable permissions to bin/sbin folders
+  become: yes
+  become_user: hadoop
   file:
     path: "{{ item }}"
     state: directory
