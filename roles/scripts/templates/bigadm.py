@@ -200,102 +200,96 @@ class bigadm:
         nm_hosts = self.parse_ansible_inventory('nameNode')
         dn_hosts = self.parse_ansible_inventory('dataNode')
         jn_hosts = self.parse_ansible_inventory('journalNode')
-        '''
-        if script_type.lower() == 'service' and action == 'status':
-            if hostname in jn_hosts:
-                is_running = self.check_process_of_pid_over_local(
-                    jn_pid_file, 'java')
-                if is_running:
-                    self.logger.info("Journal Node {} Running...".format(hostname))
-                else:
-                    self.logger.info("Journal Node {} is not Running...".format(hostname))
-        '''
+
         if action == 'status':
-            for host in jn_hosts:
-                if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                    is_running = self.check_process_of_pid_over_ssh(
-                        jn_pid_file, 'java')
-                    if is_running:
-                        self.logger.info("Journal Node {} Running...".format(host))
-                    else:
-                        self.logger.info("Journal Node {} is not Running...".format(host))
-                    break
-                else:
-                    is_running = self.check_process_of_pid_over_ssh(
-                        jn_pid_file, 'java',host=host)
-                    if is_running:
-                        self.logger.info("Journal Node {} Running...".format(host))
-                    else:
-                        self.logger.info(
-                            "Journal Node {} is not Running...".format(host))
-            for host in dn_hosts:
-                if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                    is_running = self.check_process_of_pid_over_ssh(
-                        dn_pid_file, 'java')
-                    if is_running:
-                        self.logger.info("Data Node {} Running...".format(host))
-                    else:
-                        self.logger.info("Data Node {} is not Running...".format(host))
-                    break
-                else:
-                    is_running = self.check_process_of_pid_over_ssh(
-                        dn_pid_file, 'java',host=host)
-                    if is_running:
-                        self.logger.info("Data Node {} Running...".format(host))
-                    else:
-                        self.logger.info(
-                            "Data Node {} is not Running...".format(host)) 
-            for host in nm_hosts:
-                if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                    is_running = self.check_process_of_pid_over_ssh(
-                        nm_pid_file, 'java')
-                    if is_running:
-                        self.logger.info("Name Node {} Running...".format(host))
-                    else:
-                        self.logger.info("Name Node {} is not Running...".format(host))
-                    is_running = self.check_process_of_pid_over_ssh(
-                        zkfc_pid_file, 'java')
-                    if is_running:
-                        self.logger.info("ZKFailoverController {} Running...".format(host))
-                    else:
-                        self.logger.info("ZKFailoverController {} is not Running...".format(host))                        
-                    break
-                else:
-                    is_running = self.check_process_of_pid_over_ssh(
-                        nm_pid_file, 'java',host=host)
-                    if is_running:
-                        self.logger.info("Name Node {} Running...".format(host))
-                    else:
-                        self.logger.info(
-                            "Name Node {} is not Running...".format(host))           
-                    is_running = self.check_process_of_pid_over_ssh(
-                        zkfc_pid_file, 'java',host=host)
-                    if is_running:
-                        self.logger.info("ZKFailoverController {} Running...".format(host))
-                    else:
-                        self.logger.info(
-                            "ZKFailoverController {} is not Running...".format(host))                           
+            #print("reached start")
+            #print(script_type)
+            if service == 'journalnode':
+                for host in jn_hosts:
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            is_running = self.check_process_of_pid_over_ssh(jn_pid_file, 'java')
+                            if is_running:
+                                self.logger.info("JournalNode on {} Running...".format(host))
+                            else:
+                                self.logger.info("JournalNode on {} is not Running...".format(host))                            
+                            break
+                    if script_type is None:
+                        is_running = self.check_process_of_pid_over_ssh(jn_pid_file, 'java',host=host)
+                        if is_running:
+                            self.logger.info("JournalNode on {} Running...".format(host))
+                        else:
+                            self.logger.info("JournalNode {} is not Running...".format(host))
+                            
+            elif service == 'namenode':
+                for host in nm_hosts:
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            is_running = self.check_process_of_pid_over_ssh(nm_pid_file, 'java')
+                            if is_running:
+                                self.logger.info("NameNode on {} Running...".format(host))
+                            else:
+                                self.logger.info("NameNode on {} is not Running...".format(host))                            
+                            break
+                    if script_type is None:
+                        is_running = self.check_process_of_pid_over_ssh(nm_pid_file, 'java',host=host)
+                        if is_running:
+                            self.logger.info("NameNode on {} Running...".format(host))
+                        else:
+                            self.logger.info("NameNode on: {} is not Running...".format(host))                      
+            elif service == 'datanode':
+                for host in dn_hosts:
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            is_running = self.check_process_of_pid_over_ssh(dn_pid_file, 'java')
+                            if is_running:
+                                self.logger.info("DataNode on {} Running...".format(host))
+                            else:
+                                self.logger.info("DataNode on {} is not Running...".format(host))                            
+                            break
+                    if script_type is None:
+                        is_running = self.check_process_of_pid_over_ssh(dn_pid_file, 'java',host=host)
+                        if is_running:
+                            self.logger.info("DataNode on {} Running...".format(host))
+                        else:
+                            self.logger.info("DataNode on: {} is not Running...".format(host))  
+            elif service == 'zkfc':
+                for host in nm_hosts:
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            is_running = self.check_process_of_pid_over_ssh(zkfc_pid_file, 'java')
+                            if is_running:
+                                self.logger.info("ZKFailoverController on {} Running...".format(host))
+                            else:
+                                self.logger.info("ZKFailoverController on {} is not Running...".format(host))                            
+                            break
+                    if script_type is None:
+                        is_running = self.check_process_of_pid_over_ssh(zkfc_pid_file, 'java',host=host)
+                        if is_running:
+                            self.logger.info("ZKFailoverController on {} Running...".format(host))
+                        else:
+                            self.logger.info("ZKFailoverController on: {} is not Running...".format(host))  
+                                                 
         elif action == 'start':
-            #print("reached stop")
+            #print("reached start")
             #print(script_type)
             if service == 'namenode':
                 for host in nm_hosts:
-                    if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                        #print("reached loop")
-                        cmd = [hadoop_daemon,'start','namenode']
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            self.logger.info("Starting Namenode on node: {}".format(host))
+                            cmd = [hadoop_daemon,'start','namenode']
+                            out=self.run_command_over_ssh(cmd)
+                            break
+                    if script_type is None:
                         self.logger.info("Starting Namenode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
-                        #print("breaking loop")
-                        break
-                    else:
-                        cmd = ['ssh',host,hadoop_daemon,'start','namenode']
-                        self.logger.info("Starting Namenode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
+                        cmd = ['ssh',host,hadoop_daemon,'start','namenode'] 
+                        out=self.run_command_over_ssh(cmd)    
             elif service == 'zkfc':
                 for host in nm_hosts:
                     if script_type is not None and script_type.lower() == 'service':
                         if host == hostname:                        
-                            self.logger.info("Starting ZKFailoverController on node:".format(host))
+                            self.logger.info("Starting ZKFailoverController on node: {}".format(host))
                             cmd = [hadoop_daemon,'start','zkfc']
                             out=self.run_command_over_ssh(cmd)
                             break
@@ -303,29 +297,30 @@ class bigadm:
                         self.logger.info("Starting ZKFailoverController on node: {}".format(host))
                         cmd = ['ssh',host,hadoop_daemon,'start','zkfc'] 
                         out=self.run_command_over_ssh(cmd)                        
-                        
             elif service == 'datanode':
                 for host in dn_hosts:
-                    if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                        cmd = [hadoop_daemon,'start','datanode']
-                        self.logger.info("Starting datanode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
-                        break
-                    else:
-                        cmd = ['ssh',host,hadoop_daemon,'start','datanode']
-                        self.logger.info("Starting datanode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            self.logger.info("Starting Datanode on node: {}".format(host))
+                            cmd = [hadoop_daemon,'start','datanode']
+                            out=self.run_command_over_ssh(cmd)
+                            break
+                    if script_type is None:
+                        self.logger.info("Starting Datanode on node: {}".format(host))
+                        cmd = ['ssh',host,hadoop_daemon,'start','datanode'] 
+                        out=self.run_command_over_ssh(cmd)   
             elif service == 'journalnode':
                 for host in jn_hosts:
-                    if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                        cmd = [hadoop_daemon,'start','journalnode']
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            self.logger.info("Starting journalnode on node: {}".format(host))
+                            cmd = [hadoop_daemon,'start','journalnode']
+                            out=self.run_command_over_ssh(cmd)
+                            break
+                    if script_type is None:
                         self.logger.info("Starting journalnode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
-                        break
-                    else:
-                        cmd = ['ssh',host,hadoop_daemon,'start','journalnode']
-                        self.logger.info("Starting journalnode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
+                        cmd = ['ssh',host,hadoop_daemon,'start','journalnode'] 
+                        out=self.run_command_over_ssh(cmd) 
             else:
                 self.logger.error("Invalid Servie: {} selected...".format(service))
         elif action == 'stop':
@@ -333,22 +328,21 @@ class bigadm:
             #print(script_type)
             if service == 'namenode':
                 for host in nm_hosts:
-                    if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                        #print("reached loop")
-                        cmd = [hadoop_daemon,'stop','namenode']
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            self.logger.info("Stopping Namenode on node: {}".format(host))
+                            cmd = [hadoop_daemon,'start','namenode']
+                            out=self.run_command_over_ssh(cmd)
+                            break
+                    if script_type is None:
                         self.logger.info("Stopping Namenode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
-                        #print("breaking loop")
-                        break
-                    else:
-                        cmd = ['ssh',host,hadoop_daemon,'stop','namenode']
-                        self.logger.info("Stopping Namenode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
+                        cmd = ['ssh',host,hadoop_daemon,'start','namenode'] 
+                        out=self.run_command_over_ssh(cmd)    
             elif service == 'zkfc':
                 for host in nm_hosts:
                     if script_type is not None and script_type.lower() == 'service':
                         if host == hostname:                        
-                            self.logger.info("Stopping ZKFailoverController on node:".format(host))
+                            self.logger.info("Stopping ZKFailoverController on node: {}".format(host))
                             cmd = [hadoop_daemon,'start','zkfc']
                             out=self.run_command_over_ssh(cmd)
                             break
@@ -358,26 +352,28 @@ class bigadm:
                         out=self.run_command_over_ssh(cmd)                        
             elif service == 'datanode':
                 for host in dn_hosts:
-                    if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                        cmd = [hadoop_daemon,'stop','datanode']
-                        self.logger.info("Stopping datanode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
-                        break
-                    else:
-                        cmd = ['ssh',host,hadoop_daemon,'stop','datanode']
-                        self.logger.info("Stopping datanode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            self.logger.info("Stopping Datanode on node: {}".format(host))
+                            cmd = [hadoop_daemon,'start','datanode']
+                            out=self.run_command_over_ssh(cmd)
+                            break
+                    if script_type is None:
+                        self.logger.info("Stopping Datanode on node: {}".format(host))
+                        cmd = ['ssh',host,hadoop_daemon,'start','datanode'] 
+                        out=self.run_command_over_ssh(cmd)   
             elif service == 'journalnode':
                 for host in jn_hosts:
-                    if script_type is not None and script_type.lower() == 'service'and host == hostname:
-                        cmd = [hadoop_daemon,'stop','journalnode']
+                    if script_type is not None and script_type.lower() == 'service':
+                        if host == hostname: 
+                            self.logger.info("Stopping journalnode on node: {}".format(host))
+                            cmd = [hadoop_daemon,'start','journalnode']
+                            out=self.run_command_over_ssh(cmd)
+                            break
+                    if script_type is None:
                         self.logger.info("Stopping journalnode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
-                        break
-                    else:
-                        cmd = ['ssh',host,hadoop_daemon,'stop','journalnode']
-                        self.logger.info("Stopping journalnode on node: {}".format(host))
-                        out=self.run_command_over_ssh(cmd)
+                        cmd = ['ssh',host,hadoop_daemon,'start','journalnode'] 
+                        out=self.run_command_over_ssh(cmd)  
             else:
                 self.logger.error("Invalid Servie: {} selected...".format(service))
 
@@ -425,12 +421,13 @@ class bigadm:
         elif action == 'stop':
             zk_hosts = self.parse_ansible_inventory('zookeeperNode')
             for host in zk_hosts:
-                if script_type is not None and script_type.lower() == 'service'and host == hostname:                    
-                    self.logger.info("Stopping zookeeper on Node: {}".format(host))
-                    cmd = [zk_bin_exe,'start'] 
-                    out=self.run_command_over_ssh(cmd)
-                    break
-                else:
+                if script_type is not None and script_type.lower() == 'service':
+                    if host == hostname:                        
+                        self.logger.info("Stopping zookeeper on Node: {}".format(host))
+                        cmd = [zk_bin_exe,'stop'] 
+                        out=self.run_command_over_ssh(cmd)
+                        break
+                if script_type is None:
                     self.logger.info("Stopping zookeeper on Node: {}".format(host))
                     cmd = ['ssh',host,zk_bin_exe,'stop'] 
                     out=self.run_command_over_ssh(cmd)
@@ -666,7 +663,7 @@ class bigadm:
 
     def status_service(self,args,all_service=False):
 
-        print(args)
+        #print(args)
         if all_service:
             self.logger.info("Checking all service status")
             self.hdfs_service('status',script_type=args.type)
