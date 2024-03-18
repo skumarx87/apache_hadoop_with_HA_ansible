@@ -1,41 +1,42 @@
 ---
 - name: Checking scripts already installed or not
-  become: yes
-  become_user: hadoop
   stat:
     path: "{{ bigdata_dir_scripts }}"
   register: scripts_installed_status
 
 - name: Creating Script and log directory
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: root
   file:
     path: "{{ item }}"
     state: directory
+    owner: "{{ HADOOP_USER }}"
+    group: "{{ HADOOP_USER }}"
   register: dir_creation_status
   with_items:
+     - "{{ bigdata_dir }}/Envs"
      - "{{ bigdata_dir }}/pids"
      - "{{ bigdata_dir }}/logs"
      - "{{ bigdata_dir_scripts }}"
 
 - name: Copy bigadm.sh 
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=bigadm.sh dest="{{ bigdata_dir_scripts }}/bigadm.sh" mode=644
 
 - name: Copy bigadm.py
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=bigadm.py dest="{{ bigdata_dir_scripts }}/bigadm.py" mode=644
 
 - name: Copy bigdata-user-profile.sh 
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=bigdata-user-profile.sh dest="{{ bigdata_dir_scripts }}/bigdata-user-profile.sh" mode=644
 
 - name: "Creating Scripts Env soft link"
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   file:
    src: "{{ item.src }}"
    dest: "{{ item.dest }}"
@@ -43,12 +44,13 @@
   with_items:
    - { src: "{{ bigdata_dir_scripts }}", dest: "{{ bigdata_env_dir }}/scripts" }
    - { src: "{{ bigdata_dir_scripts }}/bigadm.sh", dest: "{{ bigdata_dir }}/bigadm.sh" }
+   - { src: "{{ bigdata_dir_scripts }}/bigadm.py", dest: "{{ bigdata_dir }}/bigadm.py" }
    - { src: "{{ bigdata_dir_scripts }}/bigdata-user-profile.sh", dest: "{{ bigdata_dir }}/bigdata-user-profile.sh" }
 #  when: not hadoop_installed_status.stat.exists
 
 - name: Setting-up Executable permissions to scripts folders
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   file:
     path: "{{ item }}"
     state: directory
@@ -59,10 +61,9 @@
      - "{{ bigdata_dir_scripts }}"
 
 - name: Updating Bash profile 
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   lineinfile:
     path: "/home/{{ HADOOP_USER }}/.bash_profile"
     line: "source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh"
     backup: yes
-

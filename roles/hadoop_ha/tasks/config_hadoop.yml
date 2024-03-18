@@ -1,6 +1,6 @@
 - name: creating hdfs workers file
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   blockinfile:
    path: "{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/workers"
    block: |
@@ -8,24 +8,32 @@
     {{  host }}
     {% endfor %}
 
+- name: Creating namenode directory
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  file:
+    path: "{{ bigdata_dir }}/data/name_dir"
+    state: directory
+  when: not hadoop_installed_status.stat.exists and inventory_hostname in groups['nameNode']
+
 - name: creating core-site.xml file
-  become: yes
-  become_user: hadoop
-  template: src=core-site.yml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/core-site.xml" mode=644
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  template: src=core-site.xml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/core-site.xml" mode=644
 
 - name: creating hdfs-site.xml file
-  become: yes
-  become_user: hadoop
-  template: src=hdfs-site.yml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/hdfs-site.xml" mode=644
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  template: src=hdfs-site.xml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/hdfs-site.xml" mode=644
 
 - name: Copy Hadoop mapred-site.xml
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=mapred-site.xml dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
 
 - name: Copy Hadoop hadoop-env.sh
-  become: yes
-  become_user: hadoop
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=hadoop-env.sh dest="{{ bigdata_new_release_dir }}/hadoop-{{ hadoop_version }}/etc/hadoop/" mode=644
 
 - name: stopping zookeeper
@@ -68,72 +76,21 @@
   template: src=datanode.service dest="/etc/systemd/system/" mode=644
   notify: enable_datanode_service
   when: inventory_hostname in groups['dataNode']
-#- name: stopping zkfc
-#  debug: msg='' 
-#  changed_when: false 
-#  notify: stopping_zkfc
-#  when: is_hadoop_already_installed
-
-#- name: Starting zookeeper
-#  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zookeeper 
-#  async: 90
-#  poll: 1
-#  run_once: true
-#  when:
-#    - not is_hadoop_already_installed
-#    - inventory_hostname in groups["nameNode"]
-
-#- name: Starting journalnode
-#  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start journalnode
-#  async: 90
-#  poll: 1 
-#  run_once: true
-#  when:
-#    - not is_hadoop_already_installed
-#    - inventory_hostname in groups["nameNode"] 
-
 
 - name: stopping zkfc and format
   #debug: msg=''
   #changed_when: false
   command: /bin/true
   notify:
-    - starting_zookeeper 
-    - stopping_zkfc
-    - zkfc_format
+    #    - starting_zookeeper 
     - starting_journalnode
-    - starting_namenode
+    - delete_hadoop_ha_node_from_zookeeper
+    - namenode_format
+    - zkfc_format
+    - starting_active_namenode
+    - standby_namenode_bootstrap
+    - starting_standy_namenode
     - starting_zkfc
     - starting_datanode
   when: not is_hadoop_already_installed
-
-#- name: hadoop namenode zkfc format 
-#  run_once: true
-#  async: 90
-#  poll: 1 
-#  notify: starting_zkfc 
-#  ansible.builtin.shell: |
-#    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
-#    hdfs zkfc -formatZK -force
-#  when:
-#    - not is_hadoop_already_installed
-#    - inventory_hostname in groups["nameNode"] 
-
-#- name: Starting zookeeper
-#  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zookeeper
-#  async: 90
-#  poll: 1
-#  run_once: true
-#  when:
-#    - not is_hadoop_already_installed
-#    - inventory_hostname in groups["nameNode"]
-
-#- name: Starting hdfs services
-#  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start hdfs
-#  async: 90
-#  poll: 1
-#  run_once: true
-#  when:
-#    - not is_hadoop_already_installed
-#    - inventory_hostname in groups["nameNode"]
 

@@ -5,6 +5,8 @@
 
 
 - name: Creates directory
+  become: true
+  become_user: hadoop
   file:
     path: "{{ item }}"
     state: directory
@@ -14,11 +16,17 @@
 
 
 - name: Download Zookeeper
+  become: true
+  become_user: hadoop
   get_url:
     url: "{{ zookeeper_url }}"
     dest: "{{ tmp_dir_cache }}/{{ zookeeper_file }}"
+    owner: "{{ HADOOP_USER }}"
+    group: "{{ HADOOP_USER }}"
   when: not zookeeper_download_file.stat.exists
 
 - name: "Moving Files"
+  become: true
+  become_user: hadoop
   command: mv {{ tmp_dir_cache }}/{{ zookeeper_file }} {{ tmp_dir }}/{{ zookeeper_file }}
   when: not zookeeper_download_file.stat.exists 

@@ -5,21 +5,31 @@
 
 
 - name: Creates directory
+  become: true
+  become_user: root 
   file:
     path: "{{ item }}"
     state: directory
+    owner: "{{ HADOOP_USER }}"
+    group: "{{ HADOOP_USER }}"      
   with_items:
      - "{{ tmp_dir }}"
      - "{{ tmp_dir_cache }}"
 
 
 - name: Download Tez
+  become: true
+  become_user: hadoop
   get_url:
     url: "{{ tez_url }}"
     dest: "{{ tmp_dir_cache }}/{{ tez_file }}"
+    owner: "{{ HADOOP_USER }}"
+    group: "{{ HADOOP_USER }}"
     validate_certs: no
   when: not tez_download_file.stat.exists
 
 - name: "Moving Files"
+  become: true
+  become_user: hadoop
   command: mv {{ tmp_dir_cache }}/{{ tez_file }} {{ tmp_dir }}/{{ tez_file }}
   when: not tez_download_file.stat.exists 

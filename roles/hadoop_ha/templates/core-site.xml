@@ -1,19 +1,4 @@
-<configuration>
-
-  <property>
-    <name>fs.default.name</name>
-    <value>{{ FS_DEFAULT_NAME }}</value>
-  </property>
-  <!-- to connect hive/beeline all the host using user hadoop -->
-  <property>
-     <name>hadoop.proxyuser.hadoop.groups</name>
-    <value>*</value>
-  </property>
-  <property>
-    <name>hadoop.proxyuser.hadoop.hosts</name>
-    <value>*</value>
-  </property>
-
-
-</configuration>
-
+        <property>
+                <name>fs.defaultFS</name>
+                <value>hdfs://{{ NAMNODE_HA }}</value>
+        </property>

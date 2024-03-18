@@ -1,5 +1,7 @@
 ---
 - name: stopping_namenode
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop namenode
   run_once: true
   when:
@@ -8,13 +10,16 @@
 
 
 - name: stopping_zkfc
-  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop zkfc
-  run_once: true
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop zkfc --type=service
   when:
     - inventory_hostname in groups["nameNode"]
   #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zkfc 
 
 - name: stopping_datanode
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop datanode
   run_once: true
   when:
@@ -23,14 +28,17 @@
   #
 
 - name: stopping_journalnode
-  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop journalnode
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop journalnode --type servioe
   async: 90
   poll: 1
-  run_once: true
   when:
     - inventory_hostname in groups["nameNode"]
 
 - name: stopping_zookeeper
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
   run_once: true
   when:
@@ -39,50 +47,147 @@
   #
 
 - name: starting_zookeeper
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zookeeper
   run_once: true
   when:
     - inventory_hostname in groups["nameNode"]
   #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
-
-- name: zkfc_format
-  run_once: true
-  async: 90
-  poll: 1
-  ansible.builtin.shell: |
-    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
-    hdfs zkfc -formatZK -force
-  when:
-    - inventory_hostname in groups["nameNode"]
+  #
 
 - name: starting_journalnode
-  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start journalnode
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    cd "/home/{{ HADOOP_USER }}"
+    hdfs --daemon start journalnode
+  register: journalnode_out
+  until: journalnode_out.finished
   async: 90
   poll: 1
+  when:
+    - inventory_hostname in groups["journalNode"]
+
+- name: delete_hadoop_ha_node_from_zookeeper
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   run_once: true
+  async: 120
+  poll: 1
+  register: delete_hadoop_ha_node_from_zookeeper
+  until: delete_hadoop_ha_node_from_zookeeper.finished
+  ansible.builtin.shell: |
+    #!/bin/bash
+    echo "ls /hadoop-ha"|zkCli.sh -server localhost:2181|grep -q "hadoop-ha" |grep CONNECTED
+    if [ $? -eq 0 ]; then
+    echo "delete /hadoop-ha"|zkCli.sh -server localhost:2181
+    sleep 15
+    fi
   when:
     - inventory_hostname in groups["nameNode"]
 
-- name: starting_namenode
-  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start namenode
+- name: namenode_format
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  async: 90
+  poll: 1
+  register: namenode_format_out
+  until: namenode_format_out.finished
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    hdfs namenode -format -force
+  when:
+    - inventory_hostname in groups["nameNode"][0]
+
+      
+- name: zkfc_format
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   run_once: true
+  async: 120
+  poll: 1
+  register: zkfc_format_out 
+  until: zkfc_format_out.finished
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    hdfs zkfc -formatZK -force >/tmp/zkfc_format.log 2>&1
   when:
     - inventory_hostname in groups["nameNode"]
-  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+
+
+- name: starting_active_namenode
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    cd "/home/{{ HADOOP_USER }}"
+    hdfs --daemon start namenode
+  register: starting_active_namenode_out
+  until: starting_active_namenode_out.finished
+  async: 90
+  poll: 1
+  when:
+    - inventory_hostname in groups["nameNode"][0]
+      
+
+- name: standby_namenode_bootstrap
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  async: 90
+  poll: 1
+  register: standby_namenode_bootstrap_out
+  until: standby_namenode_bootstrap_out.finished
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    hdfs namenode -bootstrapStandby
+  when:
+    - inventory_hostname in groups["nameNode"][1:]
+
+      
+- name: starting_standy_namenode
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    cd "/home/{{ HADOOP_USER }}"
+    hdfs --daemon start namenode
+  register: starting_standy_namenode_out
+  until: starting_standy_namenode_out.finished
+  async: 90
+  poll: 1
+  when:
+    - inventory_hostname in groups["nameNode"][1:]
 
 - name: starting_zkfc
-  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start zkfc
-  run_once: true
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    cd "/home/{{ HADOOP_USER }}"
+    hdfs --daemon start zkfc
+  register: zkfc_out
+  until: zkfc_out.finished
+  async: 90
+  poll: 1
   when:
     - inventory_hostname in groups["nameNode"]
-  #script: ./usr/bigdata/Envs/scripts/bigadm.py --start zkfc 
 
 - name: starting_datanode
-  shell: source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh;/usr/bigdata/Miniconda3/bin/python3 /usr/bigdata/Envs/scripts/bigadm.py --start datanode
-  run_once: true
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  ansible.builtin.shell: |
+    source /usr/bigdata/Envs/scripts/bigdata-user-profile.sh
+    cd "/home/{{ HADOOP_USER }}"
+    hdfs --daemon start datanode 
+  register: datanode_out
+  until: datanode_out.finished
+  async: 90
+  poll: 1
   when:
-    - inventory_hostname in groups["nameNode"]
-  #command: /usr/bigdata/Miniconda3/bin/python /usr/bigdata/Envs/scripts/bigadm.py --stop zookeeper
+    - inventory_hostname in groups["dataNode"]
+      
 
 - name: enable_journalnode_service 
   become: true

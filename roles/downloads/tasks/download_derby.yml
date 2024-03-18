@@ -5,6 +5,8 @@
 
 
 - name: Creates directory
+  become: true
+  become_user: hadoop
   file:
     path: "{{ item }}"
     state: directory
@@ -14,12 +16,18 @@
 
 
 - name: Download Derby
+  become: true
+  become_user: hadoop
   get_url:
     url: "{{ derby_url }}"
     dest: "{{ tmp_dir_cache }}/{{ derby_file }}"
+    owner: "{{ HADOOP_USER }}"
+    group: "{{ HADOOP_USER }}"
     validate_certs : no
   when: not derby_download_file.stat.exists
 
 - name: "Moving Files"
+  become: true
+  become_user: hadoop
   command: mv {{ tmp_dir_cache }}/{{ derby_file }} {{ tmp_dir }}/{{ derby_file }}
   when: not derby_download_file.stat.exists 

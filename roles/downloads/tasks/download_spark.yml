@@ -5,6 +5,8 @@
 
 
 - name: Creates directory
+  become: true
+  become_user: hadoop
   file:
     path: "{{ item }}"
     state: directory
@@ -14,12 +16,18 @@
 
 
 - name: Download Spark
+  become: true
+  become_user: hadoop
   get_url:
     url: "{{ spark_url }}"
     dest: "{{ tmp_dir_cache }}/{{ spark_file }}"
+    owner: "{{ HADOOP_USER }}"
+    group: "{{ HADOOP_USER }}"
     validate_certs : no
   when: not spark_download_file.stat.exists
 
 - name: "Moving Files"
+  become: true
+  become_user: hadoop
   command: mv {{ tmp_dir_cache }}/{{ spark_file }} {{ tmp_dir }}/{{ spark_file }}
   when: not spark_download_file.stat.exists 

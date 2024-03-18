@@ -10,20 +10,28 @@
 
 
 - name: Creates directory
+  become: true
+  become_user: hadoop
   file:
     path: "{{ item }}"
     state: directory
+    owner: "{{ HADOOP_USER }}"
+    group: "{{ HADOOP_USER }}"
   with_items:
      - "{{ tmp_dir }}"
      - "{{ tmp_dir_cache }}"
 
 
 - name: Download Hadoop
+  become: true
+  become_user: hadoop
   get_url:
     url: "{{ hadoop_url }}"
     dest: "{{ tmp_dir_cache }}/{{ hadoop_file }}"
   when: not hadoop_download_file.stat.exists
 
 - name: "Moving Files"
+  become: true
+  become_user: hadoop
   command: mv {{ tmp_dir_cache }}/{{ hadoop_file }} {{ tmp_dir }}/{{ hadoop_file }}
   when: not hadoop_download_file.stat.exists 

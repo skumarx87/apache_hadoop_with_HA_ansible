@@ -1,7 +1,7 @@
 ---
 - name: "Creating directory: {{ bigdata_dir_zookeeper }}/dataDir"
   become: yes
-  become_user: hadoop
+  become_user: "{{ HADOOP_USER }}"
   ansible.builtin.file: 
     path: '{{ bigdata_dir_zookeeper }}/dataDir' 
     state: directory
@@ -9,33 +9,34 @@
 
 - name: Creating zoo.cfg ha file 
   become: yes
-  become_user: hadoop
+  become_user: "{{ HADOOP_USER }}"
   template: src=zoo.cfg dest="{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin/conf/" mode=644
 
 - name: Creating log4j.properties file 
   become: yes
-  become_user: hadoop
+  become_user: "{{ HADOOP_USER }}"
   template: src=log4j.properties dest="{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin/conf/" mode=644
 
 - name: Creating zookeeper-env.sh file 
   become: yes
-  become_user: hadoop
+  become_user: "{{ HADOOP_USER }}"
   template: src=zookeeper-env.sh dest="{{ bigdata_new_release_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin/conf/" mode=644
-
-- name: Template myid file in {{ bigdata_dir_zookeeper }}/dataDir 
-  become: yes
-  become_user: hadoop
-  ansible.builtin.template: 
-    src: myid.j2 
-    dest: "{{ bigdata_dir_zookeeper }}/dataDir/myid" 
-    mode: 0644
-  #notify:
-  #  - Restart ZooKeeper service
 
 - name: copying zookeeper.service
   become: true
   become_user: root
   template: src=zookeeper.service dest="/etc/systemd/system/" mode=644
-  notify: enable_zookeeper_service
   when: inventory_hostname in groups['zookeeperNode']
+    
+
+- name: Template myid file in {{ bigdata_dir_zookeeper }}/dataDir 
+  become: yes
+  become_user: "{{ HADOOP_USER }}"
+  ansible.builtin.template: 
+    src: myid.j2 
+    dest: "{{ bigdata_dir_zookeeper }}/dataDir/myid" 
+    mode: 0644
+  notify:
+    - enable_zookeeper_service
+    - starting_zookeeper
 
