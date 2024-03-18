@@ -1,7 +1,7 @@
 ---
 # vars file for hadoop
-bigdata_release_version: "3.0.0"
-hadoop_version: "3.2.0"
+bigdata_release_version: "1.0.0"
+hadoop_version: "3.3.6"
 hive_version: "2.3.5"
 spark_version: "3.0.3"
 spark_hadoop.version: "3.2"
