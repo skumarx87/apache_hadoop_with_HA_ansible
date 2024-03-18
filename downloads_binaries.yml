@@ -5,6 +5,7 @@
     - vars/bigdata_build_versions.yml 
     - vars/main.yml 
     - vars/bigdata_install_property.yml 
+    - vars/bigdata_site_xml_properties.yml
   vars:
     download_hadoop: true
     download_hive: true

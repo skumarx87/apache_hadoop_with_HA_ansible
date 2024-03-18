@@ -1,17 +1,33 @@
 ---
 
+- name: creating spark slaves file
+  become: true
+  become_user: "{{ HADOOP_USER }}"
+  blockinfile:
+   path: "{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/slaves"
+   create: true
+   block: |
+    {% for host in groups['dataNode'] %}
+    {{  host }}
+    {% endfor %}
+
 - name: Copy Spark spark-hive-site.xml 
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=spark-hive-site.xml dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
 
 - name: Copy spark-defaults.conf
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=spark-defaults.conf dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
 
 - name: Copy Spark spark-env.sh
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=spark-env.sh dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
 
 - name: Copy Spark spark.log4j.properties 
+  become: true
+  become_user: "{{ HADOOP_USER }}"
   template: src=spark.log4j.properties dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
-
-- name: Copy slaves File
-  template: src=slaves dest="{{ bigdata_new_release_dir }}/spark-{{ spark_version }}-bin-without-hadoop/conf/" mode=644
 

@@ -7,8 +7,8 @@
     - vars/bigdata_install_property.yml 
     - vars/bigdata_site_xml_properties.yml 
   vars:
-    install_hadoop: true 
-    config_hadoop: true
+    install_hadoop: false 
+    config_hadoop: false
     install_spark: true 
     config_spark: true
 #  become: true

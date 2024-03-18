@@ -1,0 +1,39 @@
+{%- set name_node_short_names = [] %}
+{%- for host in groups['nameNode'] %}
+{{ name_node_short_names.append(host.split(".")[0]) }}
+{%- endfor %}
+
+{%- set zookeeper_nodes_uri = [] %}
+{%- for host in groups['zookeeperNode'] %}
+{{ zookeeper_nodes_uri.append("{host}:2181".format(host=host)) }}
+{%- endfor %}
+        <configuration>
+        <property>
+                <name>yarn.resourcemanager.ha.enabled</name>
+                <value>true</value>
+        </property>
+        <property>
+                <name>yarn.resourcemanager.cluster-id</name>
+                <value>{{ NAMNODE_HA }}</value>
+        </property>
+        <property>
+                <name>yarn.resourcemanager.ha.rm-ids</name>
+                <value>{{ name_node_short_names|join(',') }}</value>
+        </property>
+    {% for host in groups['nameNode'] %}
+         <property>
+                <name>yarn.resourcemanager.hostname.{{ host.split(".")[0] }}</name>
+		<value>{{ host }}</value>
+        </property>
+    {% endfor %}
+    {% for host in groups['nameNode'] %}
+        <property>
+                <name>yarn.resourcemanager.webapp.address.{{ host.split(".")[0] }}</name>
+                <value>{{ host }}:8088</value>
+        </property>
+    {% endfor %}
+         <property>
+                <name>hadoop.zk.address</name>
+                <value>{{ zookeeper_nodes_uri|join(',') }}</value>
+         </property>
+        </configuration>
